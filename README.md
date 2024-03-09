@@ -20,5 +20,13 @@ O Conjunto consiste de:
 
 
 
+## Peças Imprimiveis
+Suporte de parede para instalação do equipamento.
+Arquivo: /stl/suporte.stl
+
+Arquivo solid: /solid/suporte.sldprt
+
+
+
 
 
