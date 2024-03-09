@@ -28,6 +28,8 @@ Suporte de parede para instalação do equipamento de medição
 - Arquivo solid: /solid/suporte.sldprt
 
 
-
+# Bibliografia
+- https://randomnerdtutorials.com/esp32-load-cell-hx711/
+- https://techtutorialsx.com/2018/12/09/esp32-arduino-serial-over-bluetooth-client-connection-event/
 
 
