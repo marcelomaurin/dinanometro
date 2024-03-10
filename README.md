@@ -27,6 +27,9 @@ Suporte de parede para instalação do equipamento de medição
 - Arquivo: /stl/suporte.stl
 - Arquivo solid: /solid/suporte.sldprt
 
+Caixa de fixação do ESP32
+- Arquivo solid: /solid/caixa.sldprt
+- Arquiv /stl/caixa.stl
 
   
 
