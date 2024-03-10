@@ -26,7 +26,7 @@ O Conjunto consiste de:
 Suporte de parede para instalação do equipamento de medição
 - Arquivo: /stl/suporte.stl
 - Arquivo solid: /solid/suporte.sldprt
-- https://mundoprojetado.com.br/hx711/
+
 
   
 
@@ -34,5 +34,6 @@ Suporte de parede para instalação do equipamento de medição
 # Bibliografia
 - https://randomnerdtutorials.com/esp32-load-cell-hx711/
 - https://techtutorialsx.com/2018/12/09/esp32-arduino-serial-over-bluetooth-client-connection-event/
+- https://mundoprojetado.com.br/hx711/
 
 
