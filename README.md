@@ -26,6 +26,9 @@ O Conjunto consiste de:
 Suporte de parede para instalação do equipamento de medição
 - Arquivo: /stl/suporte.stl
 - Arquivo solid: /solid/suporte.sldprt
+- https://mundoprojetado.com.br/hx711/
+
+- 
 
 
 # Bibliografia
