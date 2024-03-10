@@ -6,10 +6,11 @@
 #include "HX711.h"
 
 // HX711 circuit wiring
-const int LOADCELL_DOUT_PIN = 16;
-const int LOADCELL_SCK_PIN = 4;
+const int LOADCELL_DOUT_PIN = 12;
+const int LOADCELL_SCK_PIN = 16;
 
 #define CALIBRATION_FACTOR -471.497
+//#define CALIBRATION_FACTOR 420.0983
 
 HX711 scale;
 
@@ -19,6 +20,9 @@ int flgconected = 0; //Testa se tem alguem
 
 int reading;
 int lastReading;
+int refzero = 0;
+uint32_t start, stop;
+volatile float f;
 
 
 //Funcoes
@@ -46,18 +50,35 @@ void Wellcome()
 
 void Inicializa()
 {
+
   flgconected = 0;
+
+  Serial.println("\nPERFORMANCE");
+  start = micros();
+  f = 0;
+  for (int i = 0; i < 100; i++)
+  {
+    reading = scale.read_medavg(7);
+  }
+  refzero = reading;
+  stop = micros();
+  Serial.print("100x read_medavg(7) = ");
+  Serial.println(stop - start);
+  Serial.print("  VAL: ");
+  Serial.println(reading, 2);
 }
 
 
 void Start_LC()
 {
   rtc_cpu_freq_config_t config;
-;  rtc_clk_cpu_freq_get_config(&config);
+  rtc_clk_cpu_freq_get_config(&config);
   rtc_clk_cpu_freq_to_config(RTC_CPU_FREQ_80M, &config);
   rtc_clk_cpu_freq_set_config_fast(&config);
-  scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);  
-  scale.set_scale(CALIBRATION_FACTOR);   // this value is obtained by calibrating the scale with known weights
+  Serial.println("Initializing the scale");
+  scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
+
+  scale.set_scale(CALIBRATION_FACTOR);   // this value is obtained by calibrating the scale with known weights; see the README for details
   scale.tare();               // reset the scale to 0
 }
 void Start_Serial()
@@ -81,10 +102,11 @@ void Start_BTSerial()
 
 void setup() {
   Start_Serial();
+  Start_LC();
   Wellcome();
   // put your setup code here, to run once:
   Start_BTSerial();
-  Start_LC();
+  Tara();  
   Serial.println("Initialize finished!");
 }
 
@@ -101,7 +123,7 @@ void Tara()
     delay(5000);
     long reading = scale.get_units(10);
     Serial.print("Result: ");
-    Serial.println(reading);
+    Serial.println(reading-refzero);
   } 
   else {
     Serial.println("HX711 not found.");
@@ -121,7 +143,9 @@ void LerLC()
 {
   if (scale.wait_ready_timeout(200)) 
   {
-    reading = round(scale.get_units());
+    //reading = round(scale.get_units());
+    // continuous scale once per second
+    reading = scale.read_medavg(7);
     Serial.print("Weight: ");
     Serial.println(reading);
     if (reading != lastReading)
