@@ -28,7 +28,7 @@ Suporte de parede para instalação do equipamento de medição
 - Arquivo solid: /solid/suporte.sldprt
 - https://mundoprojetado.com.br/hx711/
 
-- 
+  
 
 
 # Bibliografia
