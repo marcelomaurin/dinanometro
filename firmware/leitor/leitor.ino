@@ -9,8 +9,11 @@
 const int LOADCELL_DOUT_PIN = 18;
 const int LOADCELL_SCK_PIN = 19;
 
-#define CALIBRATION_FACTOR -471.497
+//#define CALIBRATION_FACTOR -471.497
 //#define CALIBRATION_FACTOR 420.0983
+#define CALIBRATION_FACTOR -7050
+
+float scaleFactor = 10000.0; // Valor obtido na calibração com 1 Newton
 
 HX711 scale;
 
@@ -101,9 +104,9 @@ void Start_BTSerial()
 }
 
 void setup() {
-  Start_Serial();
-  Start_LC();
+  Start_Serial(); 
   Wellcome();
+   Start_LC();
   // put your setup code here, to run once:
   Start_BTSerial();
   Tara();  
@@ -121,9 +124,11 @@ void Tara()
     Serial.println("Tare done...");
     Serial.print("Place a known weight on the scale...");
     delay(5000);
-    long reading = scale.get_units(10);
-    Serial.print("Result: ");
-    Serial.println(reading-refzero);
+    //reading = scale.get_units(10);
+    reading = scale.read_medavg(7);  
+    refzero = reading;
+    Serial.print("Tara: ");
+    Serial.println(reading);
   } 
   else {
     Serial.println("HX711 not found.");
@@ -133,10 +138,10 @@ void Tara()
 void displayWeight(int weight){
     
   // Display static text
-  SerialBT.println("Weight:");
-  SerialBT.print(weight);
-  SerialBT.print(" ");
-  SerialBT.print("g");
+  SerialBT.print("Peso:");
+  SerialBT.println(weight);
+  Serial.print("Peso: ");
+  Serial.println(reading);  
 }
 
 void LerLC()
@@ -145,12 +150,11 @@ void LerLC()
   {
     //reading = round(scale.get_units());
     // continuous scale once per second
-    reading = scale.read_medavg(7);
-    Serial.print("Weight: ");
-    Serial.println(reading);
+    reading = scale.read_medavg(7);  
+
     if (reading != lastReading)
     {
-      displayWeight(reading); 
+      displayWeight(reading-refzero ); 
     }
   }
 }

@@ -13,9 +13,9 @@ object frmmain: Tfrmmain
     Height = 468
     Top = 0
     Width = 893
-    ActivePage = TabSheet1
+    ActivePage = TabSheet2
     Align = alClient
-    TabIndex = 0
+    TabIndex = 1
     TabOrder = 0
     object TabSheet1: TTabSheet
       Caption = 'Informação'
@@ -39,14 +39,6 @@ object frmmain: Tfrmmain
         Digits = 0
         Increment = 10
         MarkerColor = clBlue
-      end
-      object LCDDisplay1: TLCDDisplay
-        Left = 184
-        Height = 122
-        Top = 296
-        Width = 385
-        DotSize = 5
-        FrameSize = 10
       end
       object A3nalogGauge1: TA3nalogGauge
         Left = 472
@@ -99,6 +91,15 @@ object frmmain: Tfrmmain
         Caption = 'Força:'
         ParentColor = False
       end
+      object Button1: TButton
+        Left = 317
+        Height = 31
+        Top = 347
+        Width = 94
+        Caption = 'Tara'
+        OnClick = Button1Click
+        TabOrder = 1
+      end
     end
     object TabSheet2: TTabSheet
       Caption = 'Configuração'
@@ -113,12 +114,44 @@ object frmmain: Tfrmmain
         ParentColor = False
       end
       object edPorta: TEdit
-        Left = 50
+        Left = 104
         Height = 28
-        Top = 88
+        Top = 62
         Width = 236
         TabOrder = 0
-        Text = 'COM3'
+        Text = 'COM5'
+      end
+      object Label3: TLabel
+        Left = 50
+        Height = 20
+        Top = 104
+        Width = 36
+        Caption = 'Fator:'
+        ParentColor = False
+      end
+      object edFator: TEdit
+        Left = 104
+        Height = 28
+        Top = 104
+        Width = 236
+        TabOrder = 1
+        Text = '4200983'
+      end
+      object Label4: TLabel
+        Left = 50
+        Height = 20
+        Top = 152
+        Width = 30
+        Caption = 'Tara:'
+        ParentColor = False
+      end
+      object edFator1: TEdit
+        Left = 104
+        Height = 28
+        Top = 152
+        Width = 236
+        TabOrder = 2
+        Text = '10000'
       end
     end
     object TabSheet3: TTabSheet
