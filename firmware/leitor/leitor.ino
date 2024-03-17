@@ -6,8 +6,8 @@
 #include "HX711.h"
 
 // HX711 circuit wiring
-const int LOADCELL_DOUT_PIN = 12;
-const int LOADCELL_SCK_PIN = 16;
+const int LOADCELL_DOUT_PIN = 18;
+const int LOADCELL_SCK_PIN = 19;
 
 #define CALIBRATION_FACTOR -471.497
 //#define CALIBRATION_FACTOR 420.0983
