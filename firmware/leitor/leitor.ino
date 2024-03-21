@@ -33,7 +33,8 @@ void displayWeight(int weight);
 
 //Função CallBack
 void callback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param){
-  if(event == ESP_SPP_SRV_OPEN_EVT){
+  if(event == ESP_SPP_SRV_OPEN_EVT)
+  {
     Serial.println("Client Connected");
     flgconected = 1;
   }  

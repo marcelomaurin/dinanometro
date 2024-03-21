@@ -6,8 +6,8 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls, StdCtrls,
-  TAGraph, indSliders, LedNumber, indGnouMeter, indLCDDisplay, A3nalogGauge,
-  IndLed, LazSerial, LazSynaSer;
+  ExtCtrls, TAGraph, indSliders, LedNumber, indGnouMeter, indLCDDisplay,
+  A3nalogGauge, IndLed, LazSerial, LazSynaSer;
 
 type
 
@@ -15,35 +15,45 @@ type
 
   Tfrmmain = class(TForm)
     A3nalogGauge1: TA3nalogGauge;
-    Button1: TButton;
+    btTara: TButton;
+    btCalibra: TButton;
     Chart1: TChart;
-    edFator1: TEdit;
+    edPesoCal: TEdit;
     edPorta: TEdit;
-    edFator: TEdit;
+    edTara: TEdit;
+    edCalibracao: TEdit;
+    Image1: TImage;
     indGnouMeter1: TindGnouMeter;
     indLed1: TindLed;
     Label1: TLabel;
+    Label10: TLabel;
     Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
+    Label5: TLabel;
+    Label6: TLabel;
+    Label7: TLabel;
+    Label8: TLabel;
+    Label9: TLabel;
     LazSerial1: TLazSerial;
     LEDNumber1: TLEDNumber;
+    Memo1: TMemo;
     PageControl1: TPageControl;
     TabSheet1: TTabSheet;
     TabSheet2: TTabSheet;
     TabSheet3: TTabSheet;
-    procedure Button1Click(Sender: TObject);
+    TabSheet4: TTabSheet;
+    procedure btTaraClick(Sender: TObject);
+    procedure edCalibracaoChange(Sender: TObject);
     procedure indLed1Click(Sender: TObject);
     procedure LazSerial1RxData(Sender: TObject);
     procedure LazSerial1Status(Sender: TObject; Reason: THookSerialReason;
       const Value: string);
   private
-
+    function GramasParaNewtons(pesoGramas: longint): longint;
   public
-    valor : LongInt;
-    escala : LongInt;
-    newton : longint;
-    tara : longint;
+    peso : longint;
+    forca : longint;
 
   end;
 
@@ -55,6 +65,15 @@ implementation
 {$R *.lfm}
 
 { Tfrmmain }
+
+function Tfrmmain.GramasParaNewtons(pesoGramas: longint): longint;
+const
+  g = 9.81; // Aceleração devido à gravidade em m/s^2
+begin
+  // Converte gramas para quilogramas e calcula a força em newtons
+  Result := trunc((pesoGramas / 1000) * g);
+end;
+
 
 procedure Tfrmmain.indLed1Click(Sender: TObject);
 begin
@@ -70,38 +89,63 @@ begin
 
 end;
 
-procedure Tfrmmain.Button1Click(Sender: TObject);
+procedure Tfrmmain.btTaraClick(Sender: TObject);
 begin
-  tara := valor;
+  edTara.Text := inttostr(peso);
+end;
+
+procedure Tfrmmain.edCalibracaoChange(Sender: TObject);
+var
+  fator : longint;
+  pesoaval : longint;
+begin
+   pesoaval :=   trunc(strtoint(edPesoCal.text) / peso);
+   edPesoCal.text := inttostr(pesoaval);
+
 end;
 
 procedure Tfrmmain.LazSerial1RxData(Sender: TObject);
 var
   lista : TStringList;
-  linha :string;
+  valor : string;
+  valor1: string;
   posicao : integer;
+  valor2: longint;
 begin
    lista := TStringlist.create();
-   lista.Text :=   LazSerial1.ReadData;
+   valor :=    LazSerial1.ReadData;
+   lista.Text :=  valor;
+
    if (lista.Count>0) then
    begin
-     linha := lista.Strings[0];
-     posicao := pos('Peso:',linha);
-     if(posicao>0) then
+     if(lista.Strings[0]<>'') then
      begin
-       linha := copy(linha,posicao+5,Length(linha));
-     end;
-     if(linha<>'') then
-     begin
-       valor := strtoint(linha);
-       newton := round((valor- tara) / strtoint(edFator.text));
-       LEDNumber1.Caption:= inttostr(newton);
-       indGnouMeter1.Value:= newton;
-       A3nalogGauge1.Position:=newton;
+       try
+         valor1 := trim(lista.Strings[0]);
+         if(valor1<>'') then
+         begin
+           posicao := pos('peso:', valor1);
+           if(posicao>-1) then
+           begin
+             valor := copy(valor1,posicao+6,Length(valor1));
+
+
+             peso := strtoint(valor) - strtoint(edTara.Text);
+             forca := GramasParaNewtons(peso);
+             LEDNumber1.Caption:=  inttostr(peso);
+             indGnouMeter1.Value:= peso;
+             A3nalogGauge1.Position:=peso;
+             sleep(2000);
+             //application.ProcessMessages;
+
+
+           end;
+         end;
+       finally
+       end;
      end;
 
    end;
-   Application.ProcessMessages;
 end;
 
 procedure Tfrmmain.LazSerial1Status(Sender: TObject; Reason: THookSerialReason;
