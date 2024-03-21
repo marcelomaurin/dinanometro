@@ -28,6 +28,7 @@ type
     indLed1: TindLed;
     Label1: TLabel;
     Label10: TLabel;
+    Label11: TLabel;
     Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
@@ -37,15 +38,18 @@ type
     Label8: TLabel;
     Label9: TLabel;
     LazSerial1: TLazSerial;
-    LEDNumber1: TLEDNumber;
+    LedForca: TLEDNumber;
+    ledPeso: TLEDNumber;
     Memo1: TMemo;
     PageControl1: TPageControl;
     TabSheet1: TTabSheet;
     TabSheet2: TTabSheet;
     TabSheet3: TTabSheet;
     tsSobre: TTabSheet;
+    procedure btCalibraClick(Sender: TObject);
     procedure btTaraClick(Sender: TObject);
     procedure edCalibracaoChange(Sender: TObject);
+    procedure edPortaChange(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure indLed1Click(Sender: TObject);
     procedure LazSerial1RxData(Sender: TObject);
@@ -101,7 +105,7 @@ const
   g = 9.81; // Aceleração devido à gravidade em m/s^2
 begin
   // Converte gramas para quilogramas e calcula a força em newtons
-  Result := trunc((pesoGramas / 1000) * g);
+  Result := trunc((pesoGramas ) * g);
 end;
 
 
@@ -122,16 +126,27 @@ end;
 
 procedure Tfrmmain.btTaraClick(Sender: TObject);
 begin
-  edTara.Text := inttostr(peso);
+  edTara.Text := inttostr(peso+ strtoint(edtara.text));
 end;
 
-procedure Tfrmmain.edCalibracaoChange(Sender: TObject);
+procedure Tfrmmain.btCalibraClick(Sender: TObject);
 var
   fator : longint;
   pesoaval : longint;
 begin
-   pesoaval :=   trunc(strtoint(edPesoCal.text) / peso);
-   edPesoCal.text := inttostr(pesoaval);
+
+   edCalibracao.text := inttostr(peso);
+
+end;
+
+procedure Tfrmmain.edCalibracaoChange(Sender: TObject);
+begin
+
+
+end;
+
+procedure Tfrmmain.edPortaChange(Sender: TObject);
+begin
 
 end;
 
@@ -148,6 +163,8 @@ var
   posicao : integer;
   valor2: longint;
 begin
+  if(LazSerial1.DataAvailable) then
+  begin
    lista := TStringlist.create();
    valor :=    LazSerial1.ReadData;
    lista.Text :=  valor;
@@ -164,17 +181,26 @@ begin
            if(posicao>-1) then
            begin
              valor := copy(valor1,posicao+6,Length(valor1));
+             if(TryStrToInt(valor, peso) ) then
+             begin
+               if(strtoint(edCalibracao.text)<>0) then
+               begin
+                 peso := trunc(((peso - strtoint(edTara.Text)) / strtoint(edCalibracao.text)) * strtoint(edPesoCal.text) ) ;
 
-
-             peso := strtoint(valor) - strtoint(edTara.Text);
-             forca := GramasParaNewtons(peso);
-             LEDNumber1.Caption:=  inttostr(peso);
-             indGnouMeter1.Value:= peso;
-             A3nalogGauge1.Position:=peso;
-             GeraLinha(forca);
-             sleep(2000);
-             //application.ProcessMessages;
-
+               end
+               else
+               begin
+                 peso := (peso - strtoint(edTara.Text))  ;
+               end;
+               forca := GramasParaNewtons(peso);
+               LedForca.Caption:=  inttostr(forca);
+               ledPeso.Caption := inttostr(peso);
+               indGnouMeter1.Value:= forca;
+               A3nalogGauge1.Position:=forca;
+               GeraLinha(forca);
+               //sleep(2000);
+               //application.ProcessMessages;
+             end;
 
            end;
          end;
@@ -183,6 +209,9 @@ begin
      end;
 
    end;
+  end;
+
+
 end;
 
 procedure Tfrmmain.LazSerial1Status(Sender: TObject; Reason: THookSerialReason;

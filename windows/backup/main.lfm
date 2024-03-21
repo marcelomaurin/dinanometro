@@ -14,9 +14,9 @@ object frmmain: Tfrmmain
     Height = 468
     Top = 0
     Width = 893
-    ActivePage = TabSheet1
+    ActivePage = TabSheet2
     Align = alClient
-    TabIndex = 2
+    TabIndex = 1
     TabOrder = 0
     object tsSobre: TTabSheet
       Caption = 'Sobre'
@@ -3686,8 +3686,9 @@ object frmmain: Tfrmmain
         Height = 28
         Top = 88
         Width = 236
+        OnChange = edPortaChange
         TabOrder = 0
-        Text = 'COM3'
+        Text = 'COM5'
       end
       object edTara: TEdit
         Left = 50
@@ -3695,7 +3696,7 @@ object frmmain: Tfrmmain
         Top = 154
         Width = 236
         TabOrder = 1
-        Text = '0'
+        Text = '19723'
       end
       object Label3: TLabel
         Left = 50
@@ -3714,13 +3715,13 @@ object frmmain: Tfrmmain
         ParentColor = False
       end
       object edCalibracao: TEdit
-        Left = 48
+        Left = 50
         Height = 28
         Top = 216
         Width = 236
         OnChange = edCalibracaoChange
         TabOrder = 2
-        Text = '0'
+        Text = '19921'
       end
       object Label5: TLabel
         Left = 52
@@ -3763,19 +3764,19 @@ object frmmain: Tfrmmain
       Caption = 'Informação'
       ClientHeight = 435
       ClientWidth = 885
-      object LEDNumber1: TLEDNumber
+      object LedForca: TLEDNumber
         Left = 234
         Height = 38
         Top = 64
         Width = 212
-        Caption = 'LEDNumber1'
+        Caption = '0'
       end
       object indGnouMeter1: TindGnouMeter
         Left = 16
         Height = 376
         Top = 24
         Width = 125
-        Caption = 'Força'
+        Caption = 'Força mN'
         SignalUnit = 'Units'
         ValueMax = 5000
         Digits = 0
@@ -3787,6 +3788,7 @@ object frmmain: Tfrmmain
         Height = 225
         Top = 32
         Width = 350
+        Caption = 'Força mN'
         CenterRadius = 10
         CircleRadius = 4
         LengthMainTicks = 19
@@ -3829,8 +3831,8 @@ object frmmain: Tfrmmain
         Left = 232
         Height = 20
         Top = 40
-        Width = 39
-        Caption = 'Força:'
+        Width = 77
+        Caption = 'Força (mN):'
         ParentColor = False
       end
       object btTara: TButton
@@ -3848,6 +3850,7 @@ object frmmain: Tfrmmain
         Top = 352
         Width = 94
         Caption = 'Calibra'
+        OnClick = btCalibraClick
         TabOrder = 2
       end
       object Label10: TLabel
@@ -3857,6 +3860,21 @@ object frmmain: Tfrmmain
         Width = 89
         Caption = 'Acionamento'
         ParentColor = False
+      end
+      object Label11: TLabel
+        Left = 232
+        Height = 20
+        Top = 112
+        Width = 56
+        Caption = 'Peso (g):'
+        ParentColor = False
+      end
+      object ledPeso: TLEDNumber
+        Left = 234
+        Height = 38
+        Top = 136
+        Width = 212
+        Caption = '0'
       end
     end
     object TabSheet3: TTabSheet
