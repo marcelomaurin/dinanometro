@@ -7,7 +7,8 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls, StdCtrls,
   ExtCtrls, TAGraph, indSliders, LedNumber, indGnouMeter, indLCDDisplay,
-  A3nalogGauge, IndLed, LazSerial, LazSynaSer;
+  A3nalogGauge, IndLed, LazSerial, LazSynaSer,TATypes, TASeries, TACustomSeries,  TADrawUtils,
+  TAChartUtils;
 
 type
 
@@ -42,19 +43,22 @@ type
     TabSheet1: TTabSheet;
     TabSheet2: TTabSheet;
     TabSheet3: TTabSheet;
-    TabSheet4: TTabSheet;
+    tsSobre: TTabSheet;
     procedure btTaraClick(Sender: TObject);
     procedure edCalibracaoChange(Sender: TObject);
+    procedure FormShow(Sender: TObject);
     procedure indLed1Click(Sender: TObject);
     procedure LazSerial1RxData(Sender: TObject);
     procedure LazSerial1Status(Sender: TObject; Reason: THookSerialReason;
       const Value: string);
   private
     function GramasParaNewtons(pesoGramas: longint): longint;
+    procedure GeraLinha(values: longint);
+    procedure CriaLinha();
   public
     peso : longint;
     forca : longint;
-
+    LineSeries: TLineSeries;
   end;
 
 var
@@ -65,6 +69,32 @@ implementation
 {$R *.lfm}
 
 { Tfrmmain }
+
+procedure Tfrmmain.GeraLinha(values: longint);
+begin
+   LineSeries.Add(values, 'Newton');  // Adiciona o valor e o rótulo (nome do grupo)
+
+end;
+
+procedure Tfrmmain.CriaLinha;
+var
+    valor: Variant;
+
+begin
+
+    Chart1.ClearSeries;  // Limpa as séries existentes
+    LineSeries := TLineSeries.Create(Chart1);
+    Chart1.AddSeries(LineSeries);
+
+    // Configurações da série de linha
+    LineSeries.ShowPoints := True; // Mostra pontos para cada valor
+    LineSeries.LinePen.Width := 2; // Configura a espessura da linha
+
+    // Configurações da legenda
+    Chart1.Legend.Visible := True;
+    Chart1.Legend.Alignment := laBottomLeft;  // Posição da legenda
+
+end;
 
 function Tfrmmain.GramasParaNewtons(pesoGramas: longint): longint;
 const
@@ -85,6 +115,7 @@ begin
   else
   begin
     LazSerial1.Open;
+    CriaLinha;
   end;
 
 end;
@@ -102,6 +133,11 @@ begin
    pesoaval :=   trunc(strtoint(edPesoCal.text) / peso);
    edPesoCal.text := inttostr(pesoaval);
 
+end;
+
+procedure Tfrmmain.FormShow(Sender: TObject);
+begin
+  PageControl1.ActivePage := tsSobre;
 end;
 
 procedure Tfrmmain.LazSerial1RxData(Sender: TObject);
@@ -135,6 +171,7 @@ begin
              LEDNumber1.Caption:=  inttostr(peso);
              indGnouMeter1.Value:= peso;
              A3nalogGauge1.Position:=peso;
+             GeraLinha(forca);
              sleep(2000);
              //application.ProcessMessages;
 

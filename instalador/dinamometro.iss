@@ -21,11 +21,11 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-DefaultDirName={pf}\srvfalar
+DefaultDirName={pf}\dinamometro
 DisableProgramGroupPage=yes
-OutputDir=C:\Users\marcelo.maurin\Desktop\projetos\dinanometro2\bin
+OutputDir=C:\Users\marcelo.maurin\Desktop\projetos\dinanometro\bin
 OutputBaseFilename=dinamometro_1.0
-;SetupIconFile=C:\Users\marcelo.maurin\Desktop\projetos\srvFalar\src\dina.ico
+;SetupIconFile=C:\Users\marcelo.maurin\Desktop\projetos\dinanometro\dina.ico
 Compression=lzma
 SolidCompression=yes
 
@@ -37,7 +37,7 @@ Name: "brazilianportuguese"; MessagesFile: "compiler:Languages\BrazilianPortugue
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\Users\marcelo.maurin\Desktop\projetos\dinanometro2\windows\dinanometro.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\marcelo.maurin\Desktop\projetos\dinanometro\windows\dinanometro.exe"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
