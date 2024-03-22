@@ -12,6 +12,8 @@ Criado para FATEC Ribeirão Preto - Curso de Sistemas Biomédicos.
 Autor Marcelo Maurin Martins
 email: marcelomaurinmartins@gmail.com
 
+## PinOut
+
 ## Funcionamento
 O Conjunto consiste de:
 - Equipamento eletrônico
