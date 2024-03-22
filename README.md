@@ -12,10 +12,22 @@ Criado para FATEC Ribeirão Preto - Curso de Sistemas Biomédicos.
 Autor Marcelo Maurin Martins
 email: marcelomaurinmartins@gmail.com
 
+## Relação de Peças
+ - ESP32 Duino
+ - Celula de Carga 5kg
+ - HX711
+ - 6 Fios para soldagen
+ - Roldana parafusavel
+ - Fonte 12V DC
+ - 2 parafusos
+ - Peças imprimiveis (arquivos STL)
+
 ## PinOut
 
 - LOADCELL_DOUT_PIN = 18
 - LOADCELL_SCK_PIN = 19
+
+
 
 ## Funcionamento
 O Conjunto consiste de:
