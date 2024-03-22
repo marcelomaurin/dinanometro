@@ -16,7 +16,6 @@ Ao proporcionar uma maneira tangível de medir forças e explorar a mecânica Ne
 
 Convidamos você a explorar nosso repositório, contribuir com o projeto e juntar-se a nós nessa jornada para tornar o aprendizado de física mais interativo, acessível e eficaz para todos
 
-Onde é lido na prática as forças e pesos de objetos, podendo assim apresentar a decomposição de forças.
 
 ## Autoria
 Criado para FATEC Ribeirão Preto - Curso de Sistemas Biomédicos.
