@@ -14,9 +14,9 @@ object frmmain: Tfrmmain
     Height = 468
     Top = 0
     Width = 893
-    ActivePage = TabSheet2
+    ActivePage = TabSheet3
     Align = alClient
-    TabIndex = 1
+    TabIndex = 3
     TabOrder = 0
     object tsSobre: TTabSheet
       Caption = 'Sobre'
@@ -3903,6 +3903,7 @@ object frmmain: Tfrmmain
           'Dinamômetro'
         )
         Align = alClient
+        PopupMenu = PopupMenu1
       end
     end
   end
@@ -3930,5 +3931,13 @@ object frmmain: Tfrmmain
     OnStatus = LazSerial1Status
     Left = 202
     Top = 187
+  end
+  object PopupMenu1: TPopupMenu
+    Left = 386
+    Top = 134
+    object milimpar: TMenuItem
+      Caption = 'Limpar'
+      OnClick = milimparClick
+    end
   end
 end

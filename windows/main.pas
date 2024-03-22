@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls, StdCtrls,
-  ExtCtrls, TAGraph, indSliders, LedNumber, indGnouMeter, indLCDDisplay,
+  ExtCtrls, Menus, TAGraph, indSliders, LedNumber, indGnouMeter, indLCDDisplay,
   A3nalogGauge, IndLed, LazSerial, LazSynaSer,TATypes, TASeries, TACustomSeries,  TADrawUtils,
   TAChartUtils;
 
@@ -41,7 +41,9 @@ type
     LedForca: TLEDNumber;
     ledPeso: TLEDNumber;
     Memo1: TMemo;
+    milimpar: TMenuItem;
     PageControl1: TPageControl;
+    PopupMenu1: TPopupMenu;
     TabSheet1: TTabSheet;
     TabSheet2: TTabSheet;
     TabSheet3: TTabSheet;
@@ -55,6 +57,8 @@ type
     procedure LazSerial1RxData(Sender: TObject);
     procedure LazSerial1Status(Sender: TObject; Reason: THookSerialReason;
       const Value: string);
+    procedure milimparClick(Sender: TObject);
+    procedure misalvarClick(Sender: TObject);
   private
     function GramasParaNewtons(pesoGramas: longint): longint;
     procedure GeraLinha(values: longint);
@@ -81,24 +85,35 @@ begin
 end;
 
 procedure Tfrmmain.CriaLinha;
-var
-    valor: Variant;
-
 begin
+    Chart1.ClearSeries;  // Limpa as séries existentes no gráfico
 
-    Chart1.ClearSeries;  // Limpa as séries existentes
+    // Cria uma nova série de linha e a adiciona ao gráfico
     LineSeries := TLineSeries.Create(Chart1);
     Chart1.AddSeries(LineSeries);
 
-    // Configurações da série de linha
-    LineSeries.ShowPoints := True; // Mostra pontos para cada valor
-    LineSeries.LinePen.Width := 2; // Configura a espessura da linha
+    // Configurações do título e aparência da série de linha
+    LineSeries.Title := 'Força aplicada';
+    LineSeries.ShowPoints := True;
+    LineSeries.LinePen.Width := 2;
 
     // Configurações da legenda
     Chart1.Legend.Visible := True;
-    //Chart1.Legend.Alignment := laBottomLeft;  // Posição da legenda
 
+    // Configurando os títulos dos eixos
+    Chart1.BottomAxis.Title.Caption := 'Tempo (s)'; // Define o título do eixo X
+    Chart1.LeftAxis.Title.Caption := 'Força (mN)';   // Define o título do eixo Y
+
+    // A propriedade Alignment pode ser usada para ajustar a posição do título do eixo, se necessário
+    // Por exemplo, para centralizar o título do eixo X abaixo do eixo:
+    Chart1.BottomAxis.Title.Alignment := taCenter;
+
+    // E para alinhar o título do eixo Y no meio da lateral esquerda:
+    Chart1.LeftAxis.Title.Alignment := taCenter;
+
+    // Outras configurações podem ser adicionadas aqui, conforme necessário
 end;
+
 
 function Tfrmmain.GramasParaNewtons(pesoGramas: longint): longint;
 const
@@ -225,6 +240,16 @@ begin
   begin
     indLed1.LedValue:=false;
   end;
+end;
+
+procedure Tfrmmain.milimparClick(Sender: TObject);
+begin
+      LineSeries.Clear;
+end;
+
+procedure Tfrmmain.misalvarClick(Sender: TObject);
+begin
+
 end;
 
 end.
