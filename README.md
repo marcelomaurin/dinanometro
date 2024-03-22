@@ -14,9 +14,8 @@ email: marcelomaurinmartins@gmail.com
 
 ## PinOut
 
-// HX711 circuit wiring
-const int LOADCELL_DOUT_PIN = 18;
-const int LOADCELL_SCK_PIN = 19;
+- LOADCELL_DOUT_PIN = 18
+- LOADCELL_SCK_PIN = 19
 
 ## Funcionamento
 O Conjunto consiste de:
