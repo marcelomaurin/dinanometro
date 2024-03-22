@@ -48,7 +48,15 @@ Caixa de fixação do ESP32
 - Arquivo solid: /solid/caixa.sldprt
 - Arquiv /stl/caixa.stl
 
-  
+## Software
+Software compatível com Windows.
+Notebook ou PC precisa de Bluetooth para comunicar com equipamento.
+
+### Requisitos
+Windows 7 ou superior, 4Gb de Ram, 50Mb de Disco livre.
+
+### Instalação
+Execute o instalador mais recente, localizado na pasta bin.
 
 
 # Bibliografia
