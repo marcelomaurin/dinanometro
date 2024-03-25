@@ -212,6 +212,7 @@ begin
                ledPeso.Caption := inttostr(peso);
                indGnouMeter1.Value:= forca;
                A3nalogGauge1.Position:=forca;
+               indGnouMeter1.Value:=forca;
                GeraLinha(forca);
                //sleep(2000);
                //application.ProcessMessages;

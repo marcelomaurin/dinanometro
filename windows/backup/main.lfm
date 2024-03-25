@@ -14,9 +14,9 @@ object frmmain: Tfrmmain
     Height = 468
     Top = 0
     Width = 893
-    ActivePage = TabSheet3
+    ActivePage = TabSheet1
     Align = alClient
-    TabIndex = 3
+    TabIndex = 2
     TabOrder = 0
     object tsSobre: TTabSheet
       Caption = 'Sobre'
@@ -3696,7 +3696,7 @@ object frmmain: Tfrmmain
         Top = 154
         Width = 236
         TabOrder = 1
-        Text = '19723'
+        Text = '24594'
       end
       object Label3: TLabel
         Left = 50
@@ -3721,7 +3721,7 @@ object frmmain: Tfrmmain
         Width = 236
         OnChange = edCalibracaoChange
         TabOrder = 2
-        Text = '128481'
+        Text = '4568'
       end
       object Label5: TLabel
         Left = 52
@@ -3738,7 +3738,7 @@ object frmmain: Tfrmmain
         Width = 236
         OnChange = edCalibracaoChange
         TabOrder = 3
-        Text = '20'
+        Text = '10'
       end
       object Memo1: TMemo
         Left = 352
@@ -3778,7 +3778,7 @@ object frmmain: Tfrmmain
         Width = 125
         Caption = 'Força mN'
         SignalUnit = 'Units'
-        ValueMax = 5000
+        ValueMax = 10000
         Digits = 0
         Increment = 10
         MarkerColor = clBlue
@@ -3791,11 +3791,13 @@ object frmmain: Tfrmmain
         Caption = 'Força mN'
         CenterRadius = 10
         CircleRadius = 4
+        IndMaximum = 5000
+        IndMinimum = 1000
         LengthMainTicks = 19
         LengthSubTicks = 10
         Margin = 12
-        Scale = 5000
-        ScaleMax = 5000
+        Scale = 10000
+        ScaleMax = 10000
         TextDist = 12
       end
       object indLed1: TindLed
@@ -3938,10 +3940,6 @@ object frmmain: Tfrmmain
     object milimpar: TMenuItem
       Caption = 'Limpar'
       OnClick = milimparClick
-    end
-    object misalvar: TMenuItem
-      Caption = 'Salvar'
-      OnClick = misalvarClick
     end
   end
 end

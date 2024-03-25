@@ -41,7 +41,6 @@ type
     LedForca: TLEDNumber;
     ledPeso: TLEDNumber;
     Memo1: TMemo;
-    misalvar: TMenuItem;
     milimpar: TMenuItem;
     PageControl1: TPageControl;
     PopupMenu1: TPopupMenu;
@@ -213,6 +212,7 @@ begin
                ledPeso.Caption := inttostr(peso);
                indGnouMeter1.Value:= forca;
                A3nalogGauge1.Position:=forca;
+               indGnouMeter1.
                GeraLinha(forca);
                //sleep(2000);
                //application.ProcessMessages;
