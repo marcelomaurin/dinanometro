@@ -1,40 +1,41 @@
 object frmmain: Tfrmmain
   Left = 606
-  Height = 468
+  Height = 374
   Top = 220
-  Width = 893
+  Width = 714
   Caption = 'Dinanometro'
-  ClientHeight = 468
-  ClientWidth = 893
-  DesignTimePPI = 120
+  ClientHeight = 374
+  ClientWidth = 714
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
   OnShow = FormShow
-  LCLVersion = '2.2.6.0'
+  LCLVersion = '3.2.0.0'
   object PageControl1: TPageControl
     Left = 0
-    Height = 468
+    Height = 374
     Top = 0
-    Width = 893
-    ActivePage = TabSheet1
+    Width = 714
+    ActivePage = TabSheet2
     Align = alClient
-    TabIndex = 2
+    TabIndex = 1
     TabOrder = 0
     object tsSobre: TTabSheet
       Caption = 'Sobre'
-      ClientHeight = 435
-      ClientWidth = 885
+      ClientHeight = 343
+      ClientWidth = 704
       object Label6: TLabel
-        Left = 344
-        Height = 20
-        Top = 168
-        Width = 232
+        Left = 275
+        Height = 17
+        Top = 134
+        Width = 234
         Caption = 'Criado por Marcelo Maurin Martins'
         ParentColor = False
       end
       object Image1: TImage
-        Left = 32
-        Height = 184
-        Top = 56
-        Width = 160
+        Left = 26
+        Height = 147
+        Top = 45
+        Width = 128
         Picture.Data = {
           07544269746D617036C20100424D36C20100000000003600000028000000A000
           0000B4000000010020000000000000C201006400000064000000000000000000
@@ -3642,109 +3643,109 @@ object frmmain: Tfrmmain
         }
       end
       object Label7: TLabel
-        Left = 352
-        Height = 45
-        Top = 72
-        Width = 215
+        Left = 282
+        Height = 30
+        Top = 58
+        Width = 167
         Caption = 'Dinamometro'
-        Font.Height = -33
+        Font.Height = -26
         Font.Style = [fsBold]
         ParentColor = False
         ParentFont = False
       end
       object Label8: TLabel
-        Left = 352
-        Height = 20
-        Top = 216
-        Width = 233
+        Left = 282
+        Height = 17
+        Top = 173
+        Width = 237
         Caption = 'marcelomaurinmartins@gmail.com'
         ParentColor = False
       end
       object Label9: TLabel
-        Left = 312
-        Height = 20
-        Top = 296
-        Width = 321
+        Left = 250
+        Height = 17
+        Top = 237
+        Width = 325
         Caption = 'https://github.com/marcelomaurin/dinanometro'
         ParentColor = False
       end
     end
     object TabSheet2: TTabSheet
       Caption = 'Configuração'
-      ClientHeight = 435
-      ClientWidth = 885
+      ClientHeight = 343
+      ClientWidth = 704
       object Label1: TLabel
-        Left = 50
-        Height = 20
-        Top = 62
-        Width = 37
+        Left = 40
+        Height = 17
+        Top = 50
+        Width = 42
         Caption = 'Porta:'
         ParentColor = False
       end
       object edPorta: TEdit
-        Left = 50
-        Height = 28
-        Top = 88
-        Width = 236
-        OnChange = edPortaChange
+        Left = 40
+        Height = 34
+        Top = 70
+        Width = 189
         TabOrder = 0
         Text = 'COM5'
+        OnChange = edPortaChange
       end
       object edTara: TEdit
-        Left = 50
-        Height = 28
-        Top = 154
-        Width = 236
+        Left = 40
+        Height = 34
+        Top = 123
+        Width = 189
         TabOrder = 1
         Text = '24594'
       end
       object Label3: TLabel
-        Left = 50
-        Height = 20
-        Top = 128
-        Width = 30
+        Left = 40
+        Height = 17
+        Top = 102
+        Width = 34
         Caption = 'Tara:'
         ParentColor = False
       end
       object Label4: TLabel
-        Left = 50
-        Height = 20
-        Top = 192
-        Width = 112
+        Left = 40
+        Height = 17
+        Top = 154
+        Width = 115
         Caption = 'Valor Calibração:'
         ParentColor = False
       end
       object edCalibracao: TEdit
-        Left = 50
-        Height = 28
-        Top = 216
-        Width = 236
-        OnChange = edCalibracaoChange
+        Left = 40
+        Height = 34
+        Top = 173
+        Width = 189
         TabOrder = 2
         Text = '4568'
+        OnChange = edCalibracaoChange
       end
       object Label5: TLabel
-        Left = 52
-        Height = 20
-        Top = 256
-        Width = 129
+        Left = 42
+        Height = 17
+        Top = 205
+        Width = 130
         Caption = 'Peso de Calibração:'
         ParentColor = False
       end
       object edPesoCal: TEdit
-        Left = 50
-        Height = 28
-        Top = 280
-        Width = 236
-        OnChange = edCalibracaoChange
+        Left = 40
+        Height = 34
+        Top = 224
+        Width = 189
         TabOrder = 3
         Text = '10'
+        OnChange = edCalibracaoChange
       end
       object Memo1: TMemo
-        Left = 352
-        Height = 384
-        Top = 24
-        Width = 504
+        Left = 282
+        Height = 307
+        Top = 19
+        Width = 403
         Lines.Strings = (
           'O sistema funciona acessando a porta serial criada pelo bluetooth.'
           ''
@@ -3762,20 +3763,20 @@ object frmmain: Tfrmmain
     end
     object TabSheet1: TTabSheet
       Caption = 'Informação'
-      ClientHeight = 435
-      ClientWidth = 885
+      ClientHeight = 343
+      ClientWidth = 704
       object LedForca: TLEDNumber
-        Left = 234
-        Height = 38
-        Top = 64
-        Width = 212
+        Left = 187
+        Height = 30
+        Top = 51
+        Width = 170
         Caption = '0'
       end
       object indGnouMeter1: TindGnouMeter
-        Left = 16
-        Height = 376
-        Top = 24
-        Width = 125
+        Left = 13
+        Height = 301
+        Top = 19
+        Width = 100
         Caption = 'Força mN'
         SignalUnit = 'Units'
         ValueMax = 10000
@@ -3784,27 +3785,19 @@ object frmmain: Tfrmmain
         MarkerColor = clBlue
       end
       object A3nalogGauge1: TA3nalogGauge
-        Left = 472
-        Height = 225
-        Top = 32
-        Width = 350
+        Left = 378
+        Height = 180
+        Top = 26
+        Width = 280
         Caption = 'Força mN'
-        CenterRadius = 10
-        CircleRadius = 4
-        IndMaximum = 5000
-        IndMinimum = 1000
-        LengthMainTicks = 19
-        LengthSubTicks = 10
-        Margin = 12
         Scale = 10000
         ScaleMax = 10000
-        TextDist = 12
       end
       object indLed1: TindLed
-        Left = 728
-        Height = 65
-        Top = 343
-        Width = 71
+        Left = 582
+        Height = 52
+        Top = 274
+        Width = 57
         OnClick = indLed1Click
         LedValue = False
         Bevels = <        
@@ -3830,64 +3823,64 @@ object frmmain: Tfrmmain
         ShapeLedColorDisabled = 13416
       end
       object Label2: TLabel
-        Left = 232
-        Height = 20
-        Top = 40
-        Width = 77
+        Left = 186
+        Height = 17
+        Top = 32
+        Width = 78
         Caption = 'Força (mN):'
         ParentColor = False
       end
       object btTara: TButton
-        Left = 264
-        Height = 31
-        Top = 352
-        Width = 94
+        Left = 211
+        Height = 25
+        Top = 282
+        Width = 75
         Caption = 'Tara'
-        OnClick = btTaraClick
         TabOrder = 1
+        OnClick = btTaraClick
       end
       object btCalibra: TButton
-        Left = 392
-        Height = 31
-        Top = 352
-        Width = 94
+        Left = 314
+        Height = 25
+        Top = 282
+        Width = 75
         Caption = 'Calibra'
-        OnClick = btCalibraClick
         TabOrder = 2
+        OnClick = btCalibraClick
       end
       object Label10: TLabel
-        Left = 720
-        Height = 20
-        Top = 408
-        Width = 89
+        Left = 576
+        Height = 17
+        Top = 326
+        Width = 90
         Caption = 'Acionamento'
         ParentColor = False
       end
       object Label11: TLabel
-        Left = 232
-        Height = 20
-        Top = 112
+        Left = 186
+        Height = 17
+        Top = 90
         Width = 56
         Caption = 'Peso (g):'
         ParentColor = False
       end
       object ledPeso: TLEDNumber
-        Left = 234
-        Height = 38
-        Top = 136
-        Width = 212
+        Left = 187
+        Height = 30
+        Top = 109
+        Width = 170
         Caption = '0'
       end
     end
     object TabSheet3: TTabSheet
       Caption = 'Grafico'
-      ClientHeight = 435
-      ClientWidth = 885
+      ClientHeight = 343
+      ClientWidth = 704
       object Chart1: TChart
         Left = 0
-        Height = 435
+        Height = 343
         Top = 0
-        Width = 885
+        Width = 704
         AxisList = <        
           item
             Marks.LabelBrush.Style = bsClear
@@ -3927,16 +3920,17 @@ object frmmain: Tfrmmain
     SynSer.ConvertLineEnd = False
     SynSer.AtTimeout = 1000
     SynSer.InterPacketTimeout = True
+    SynSer.NonBlock = False
     Device = 'COM1'
     RcvLineCRLF = False
     OnRxData = LazSerial1RxData
     OnStatus = LazSerial1Status
-    Left = 202
-    Top = 187
+    Left = 162
+    Top = 150
   end
   object PopupMenu1: TPopupMenu
-    Left = 386
-    Top = 134
+    Left = 72
+    Top = 296
     object milimpar: TMenuItem
       Caption = 'Limpar'
       OnClick = milimparClick

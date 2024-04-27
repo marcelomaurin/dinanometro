@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls, StdCtrls,
   ExtCtrls, Menus, TAGraph, indSliders, LedNumber, indGnouMeter, indLCDDisplay,
   A3nalogGauge, IndLed, LazSerial, LazSynaSer,TATypes, TASeries, TACustomSeries,  TADrawUtils,
-  TAChartUtils;
+  TAChartUtils, setmain;
 
 type
 
@@ -52,6 +52,8 @@ type
     procedure btTaraClick(Sender: TObject);
     procedure edCalibracaoChange(Sender: TObject);
     procedure edPortaChange(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure indLed1Click(Sender: TObject);
     procedure LazSerial1RxData(Sender: TObject);
@@ -67,6 +69,7 @@ type
     peso : longint;
     forca : longint;
     LineSeries: TLineSeries;
+
   end;
 
 var
@@ -163,6 +166,17 @@ end;
 procedure Tfrmmain.edPortaChange(Sender: TObject);
 begin
 
+end;
+
+procedure Tfrmmain.FormCreate(Sender: TObject);
+begin
+  FSetMain := TSetMain.create();
+  FSetMain.CarregaContexto();
+end;
+
+procedure Tfrmmain.FormDestroy(Sender: TObject);
+begin
+  FSetMain.SalvaContexto(false);
 end;
 
 procedure Tfrmmain.FormShow(Sender: TObject);

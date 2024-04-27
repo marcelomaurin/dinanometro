@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls, StdCtrls,
   ExtCtrls, Menus, TAGraph, indSliders, LedNumber, indGnouMeter, indLCDDisplay,
   A3nalogGauge, IndLed, LazSerial, LazSynaSer,TATypes, TASeries, TACustomSeries,  TADrawUtils,
-  TAChartUtils;
+  TAChartUtils, setmain;
 
 type
 
@@ -52,6 +52,7 @@ type
     procedure btTaraClick(Sender: TObject);
     procedure edCalibracaoChange(Sender: TObject);
     procedure edPortaChange(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure indLed1Click(Sender: TObject);
     procedure LazSerial1RxData(Sender: TObject);
@@ -67,6 +68,7 @@ type
     peso : longint;
     forca : longint;
     LineSeries: TLineSeries;
+
   end;
 
 var
@@ -165,6 +167,12 @@ begin
 
 end;
 
+procedure Tfrmmain.FormCreate(Sender: TObject);
+begin
+  FSetMain := TSetMain.create();
+  FSetMain.CarregaContexto();
+end;
+
 procedure Tfrmmain.FormShow(Sender: TObject);
 begin
   PageControl1.ActivePage := tsSobre;
@@ -212,7 +220,7 @@ begin
                ledPeso.Caption := inttostr(peso);
                indGnouMeter1.Value:= forca;
                A3nalogGauge1.Position:=forca;
-               indGnouMeter1.
+               indGnouMeter1.Value:=forca;
                GeraLinha(forca);
                //sleep(2000);
                //application.ProcessMessages;
