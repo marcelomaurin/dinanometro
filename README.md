@@ -39,7 +39,8 @@ email: marcelomaurinmartins@gmail.com
 - LOADCELL_DOUT_PIN = 18
 - LOADCELL_SCK_PIN = 19
 
-
+## Imagens
+<img src="https://github.com/marcelomaurin/dinanometro/blob/main/img/dinamometro.jpeg">
 
 ## Funcionamento
 O Conjunto consiste de:
