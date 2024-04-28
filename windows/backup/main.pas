@@ -53,6 +53,7 @@ type
     procedure edCalibracaoChange(Sender: TObject);
     procedure edPortaChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure indLed1Click(Sender: TObject);
     procedure LazSerial1RxData(Sender: TObject);
@@ -64,9 +65,11 @@ type
     function GramasParaNewtons(pesoGramas: longint): longint;
     procedure GeraLinha(values: longint);
     procedure CriaLinha();
+    procedure ResetPeso();
   public
     peso : longint;
     forca : longint;
+    referencia : LongInt;
     LineSeries: TLineSeries;
 
   end;
@@ -116,6 +119,12 @@ begin
     // Outras configurações podem ser adicionadas aqui, conforme necessário
 end;
 
+procedure Tfrmmain.ResetPeso();
+begin
+  edTara.text := '0';
+  edCalibracao.text := '0';
+end;
+
 
 function Tfrmmain.GramasParaNewtons(pesoGramas: longint): longint;
 const
@@ -143,16 +152,17 @@ end;
 
 procedure Tfrmmain.btTaraClick(Sender: TObject);
 begin
-  edTara.Text := inttostr(peso+ strtoint(edtara.text));
+  ResetPeso();
+  edTara.Text := Inttostr(referencia);
 end;
 
 procedure Tfrmmain.btCalibraClick(Sender: TObject);
 var
   fator : longint;
-  pesoaval : longint;
-begin
 
-   edCalibracao.text := inttostr(peso);
+begin
+  fator := trunc((referencia-strtoint(edtara.text)) / strtoint(edPesoCal.text );
+  edCalibracao.text := inttostr(fator);
 
 end;
 
@@ -171,6 +181,19 @@ procedure Tfrmmain.FormCreate(Sender: TObject);
 begin
   FSetMain := TSetMain.create();
   FSetMain.CarregaContexto();
+  edPorta.text := FSetMain.Comport;
+  edTara.text := FSetMain.Tara;
+  edCalibracao.text := FSetMain.Calibracao;
+
+end;
+
+procedure Tfrmmain.FormDestroy(Sender: TObject);
+begin
+
+  FSetMain.Comport := edPorta.text;
+  FSetMain.Tara:= edTara.text;
+  FSETMain.Calibracao:= edCalibracao.text;
+  FSetMain.SalvaContexto(false);
 end;
 
 procedure Tfrmmain.FormShow(Sender: TObject);
@@ -208,12 +231,14 @@ begin
              begin
                if(strtoint(edCalibracao.text)<>0) then
                begin
-                 peso := trunc(((peso - strtoint(edTara.Text)) / strtoint(edCalibracao.text)) * strtoint(edPesoCal.text) ) ;
+                 referencia := peso;
+                 peso := trunc(( (referencia - strtoint(edTara.Text)) / strtoint(edCalibracao.text))  ) ;
 
                end
                else
                begin
-                 peso := (peso - strtoint(edTara.Text))  ;
+                 referencia := peso;
+                 peso := (referencia - strtoint(edTara.Text) )  ;
                end;
                forca := GramasParaNewtons(peso);
                LedForca.Caption:=  inttostr(forca);

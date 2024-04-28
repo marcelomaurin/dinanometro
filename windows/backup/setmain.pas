@@ -11,7 +11,7 @@ interface
 uses
   Classes, SysUtils, funcoes, graphics;
 
-const filename = 'Setmain.cfg';
+const filename = 'dinamometro.cfg';
 
 
 type
@@ -43,6 +43,11 @@ type
         FCleanScript : string;  //Script de Limpeza
         FInstall : string;      //Script de Instalacao
         FCompile : string;      //Script de Compilação
+
+        FComport : string;
+        FTara : String;
+        FCalibracao : String;
+
 
         FHostnameMy : String;
         FBancoMy : String;
@@ -90,6 +95,9 @@ type
         property CleanScript : string read FCleanScript write FCleanScript;
         property Install : string read FInstall write FInstall;
         property Compile : string read FCompile write FCompile;
+        property Comport : string read FComport write FComport;
+        property Tara : string read FTara write FTara;
+        property Calibracao : string read FCalibracao write FCalibracao;
         property Font : TFont read FFont write SetFont;
         property CHATGPT: String read FCHATGPT write SetCHATGPT;
         property DLLPath : String read FDllPath write SetDllPath;
@@ -143,6 +151,10 @@ begin
     FCleanScript :='';  //Script de Limpeza
     FInstall :='';      //Script de Instalacao
     FCompile :='';      //Script de Compilacao
+
+    FComport := 'COM5';
+    FTara := '24594';
+    FCalibracao:= '4568';
     if FFont = nil then
     begin
          FFONT := TFont.create();
@@ -264,6 +276,14 @@ begin
     if  BuscaChave(arquivo,'COMPILESCRIPT:',posicao) then
     begin
       FCompile := RetiraInfo(arquivo.Strings[posicao]);
+    end;
+    if  BuscaChave(arquivo,'COMPORT:',posicao) then
+    begin
+      FCOMPORT := RetiraInfo(arquivo.Strings[posicao]);
+    end;
+    if  BuscaChave(arquivo,'TARA:',posicao) then
+    begin
+      FTARA := RetiraInfo(arquivo.Strings[posicao]);
     end;
 
     if  BuscaChave(arquivo,'FONT:',posicao) then
@@ -401,6 +421,8 @@ begin
   arquivo.Append('CLEANSCRIPT:'+FCleanScript);
   arquivo.Append('INSTALLSCRIPT:'+FInstall);
   arquivo.Append('COMPILESCRIPT:'+FCompile);
+  arquivo.Append('COMPORT:'+FComport);
+  arquivo.Append('TARA:'+FTARA);
   arquivo.Append('FONT:'+FontToString(FFONT));
   arquivo.Append('CHATGPT:'+FCHATGPT);
   arquivo.Append('DLLPATH:'+FDLLPATH);

@@ -46,7 +46,7 @@ void callback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param){
 
 void Wellcome()
 {
-  Serial.println("Dinanometro Version 1.0");
+  Serial.println("Dinanometro Version 1.1");
   Serial.println("Create Marcelo Maurin Martins");
   Serial.println("Email: marcelomaurinmartins@gmail.com");
 }
@@ -95,7 +95,7 @@ void Start_BTSerial()
   //Registrando o Callback da funcao
   SerialBT.register_callback(callback);
  
-  if(!SerialBT.begin("ESP32"))
+  if(!SerialBT.begin("PESO"))
   {
      Serial.println("An error occurred initializing Bluetooth");
   }else
@@ -177,5 +177,5 @@ void Leituras()
 void loop() {
   // put your main code here, to run repeatedly:
   Leituras();
-  delay(1000);
+  delay(500);
 }
