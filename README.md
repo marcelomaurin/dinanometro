@@ -39,6 +39,9 @@ email: marcelomaurinmartins@gmail.com
 - LOADCELL_DOUT_PIN = 18
 - LOADCELL_SCK_PIN = 19
 
+## HX711 Conexoes
+<img src="https://github.com/marcelomaurin/dinanometro/blob/main/img/ligcelula.JPG">
+
 ## Imagens
 <img src="https://github.com/marcelomaurin/dinanometro/blob/main/img/dinamometro.jpeg">
 
@@ -64,6 +67,16 @@ Caixa de fixação do ESP32
 ## Software
 Software compatível com Windows.
 Notebook ou PC precisa de Bluetooth para comunicar com equipamento.
+
+### Screens do Software
+#### Apresentação
+<img src="https://github.com/marcelomaurin/dinanometro/blob/main/img/software01.JPG">
+#### Operação
+<img src="https://github.com/marcelomaurin/dinanometro/blob/main/img/software02.JPG">
+#### Força sobre tempo
+<img src="https://github.com/marcelomaurin/dinanometro/blob/main/img/software03.JPG">
+#### Configurações
+<img src="https://github.com/marcelomaurin/dinanometro/blob/main/img/software04.JPG">
 
 ### Requisitos
 Windows 7 ou superior, 4Gb de Ram, 50Mb de Disco livre.
