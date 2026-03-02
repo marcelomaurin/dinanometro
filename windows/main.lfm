@@ -1,23 +1,25 @@
 object frmmain: Tfrmmain
-  Left = -1139
+  Left = 310
   Height = 374
-  Top = -11
+  Top = 285
   Width = 714
   Caption = 'Dinanometro'
   ClientHeight = 374
   ClientWidth = 714
+  Position = poMainFormCenter
+  LCLVersion = '4.4.0.0'
+  OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
-  LCLVersion = '3.2.0.0'
   object PageControl1: TPageControl
     Left = 0
     Height = 374
     Top = 0
     Width = 714
-    ActivePage = TabSheet2
+    ActivePage = tsSobre
     Align = alClient
-    TabIndex = 1
+    TabIndex = 0
     TabOrder = 0
     object tsSobre: TTabSheet
       Caption = 'Sobre'
@@ -3669,6 +3671,20 @@ object frmmain: Tfrmmain
         Caption = 'https://github.com/marcelomaurin/dinanometro'
         ParentColor = False
       end
+      object lbversao: TLabel
+        Left = 347
+        Height = 15
+        Top = 300
+        Width = 15
+        Caption = '0.1'
+      end
+      object Label12: TLabel
+        Left = 296
+        Height = 15
+        Top = 300
+        Width = 35
+        Caption = 'Versão'
+      end
     end
     object TabSheet2: TTabSheet
       Caption = 'Configuração'
@@ -3703,7 +3719,7 @@ object frmmain: Tfrmmain
         Left = 40
         Height = 15
         Top = 102
-        Width = 24
+        Width = 26
         Caption = 'Tara:'
         ParentColor = False
       end
@@ -3711,7 +3727,7 @@ object frmmain: Tfrmmain
         Left = 40
         Height = 15
         Top = 154
-        Width = 88
+        Width = 89
         Caption = 'Valor Calibração:'
         ParentColor = False
       end
@@ -3760,6 +3776,15 @@ object frmmain: Tfrmmain
         ReadOnly = True
         TabOrder = 4
       end
+      object btsalvar: TButton
+        Left = 44
+        Height = 25
+        Top = 275
+        Width = 75
+        Caption = 'Salvar'
+        TabOrder = 5
+        OnClick = btsalvarClick
+      end
     end
     object TabSheet1: TTabSheet
       Caption = 'Informação'
@@ -3777,7 +3802,7 @@ object frmmain: Tfrmmain
         Height = 301
         Top = 19
         Width = 100
-        Caption = 'Força mN'
+        Caption = 'Força Kgf'
         SignalUnit = 'Units'
         ValueMax = 10000
         Digits = 0
@@ -3786,12 +3811,14 @@ object frmmain: Tfrmmain
       end
       object A3nalogGauge1: TA3nalogGauge
         Left = 378
-        Height = 180
+        Height = 190
         Top = 26
-        Width = 280
-        Caption = 'Força mN'
-        Scale = 10000
-        ScaleMax = 10000
+        Width = 184
+        Angle = 90
+        Caption = 'Força  gf'
+        Scale = 1000000
+        ScaleMax = 1000000
+        Style = agsLeftStyle
       end
       object indLed1: TindLed
         Left = 582
@@ -3826,8 +3853,8 @@ object frmmain: Tfrmmain
         Left = 186
         Height = 15
         Top = 32
-        Width = 63
-        Caption = 'Força (mN):'
+        Width = 60
+        Caption = 'Força (kgf):'
         ParentColor = False
       end
       object btTara: TButton
@@ -3860,8 +3887,8 @@ object frmmain: Tfrmmain
         Left = 186
         Height = 15
         Top = 90
-        Width = 46
-        Caption = 'Peso (g):'
+        Width = 52
+        Caption = 'Peso (kg):'
         ParentColor = False
       end
       object ledPeso: TLEDNumber
@@ -3928,8 +3955,8 @@ object frmmain: Tfrmmain
     Top = 150
   end
   object PopupMenu1: TPopupMenu
-    Left = 72
-    Top = 296
+    Left = 64
+    Top = 320
     object milimpar: TMenuItem
       Caption = 'Limpar'
       OnClick = milimparClick

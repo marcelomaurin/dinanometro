@@ -11,114 +11,138 @@ interface
 uses
   Classes, SysUtils, funcoes, graphics;
 
-const filename = 'dinamometro.cfg';
-
+const
+  filename = 'dinamometro.cfg';
 
 type
-  { TfrmMenu }
-
   { TSetMain }
-
   TSetMain = class(TObject)
-
   private
-        arquivo :Tstringlist;
-        ckdevice : boolean;
-        FPosX : integer;
-        FPosY : integer;
-        FFixar : boolean;
-        FStay : boolean;
-        FLastFiles : String;
-        FPATH : string;
-        FHeight : integer;
-        FWidth : integer;
-        FFONT : TFont;
-        FCHATGPT : string;
-        FDllPath : string;
-        FDllMyPath : string;
-        FDllPostPath : string;
+    arquivo: TStringList;
+    ckdevice: boolean;
+    FPosX: integer;
+    FPosY: integer;
+    FFixar: boolean;
+    FStay: boolean;
+    FLastFiles: String;
+    FPATH: string;
+    FHeight: integer;
+    FWidth: integer;
+    FFONT: TFont;
+    FCHATGPT: string;
+    FDllPath: string;
+    FDllMyPath: string;
+    FDllPostPath: string;
 
-        FRunScript : string;    //Script de Compilação
-        FDebugScript : string;  //Script de Debug
-        FCleanScript : string;  //Script de Limpeza
-        FInstall : string;      //Script de Instalacao
-        FCompile : string;      //Script de Compilação
+    FRunScript: string;
+    FDebugScript: string;
+    FCleanScript: string;
+    FInstall: string;
+    FCompile: string;
 
-        FComport : string;
-        FTara : String;
-        FCalibracao : String;
+    FComport: string;
 
+    // ====== valores (string) ======
+    FTara: String;
+    FCalibracao: String;
+    FPesoCal: String; // <-- NOVO
 
-        FHostnameMy : String;
-        FBancoMy : String;
-        FUsernameMy : String;
-        FPasswordMy : String;
-
-        FHostnamePost : String;
-        FBancoPOST : String;
-        FUsernamePost: String;
-        FPasswordPost : String;
-        FSchemaPost: String;
-        FToolsFalar : Boolean;
+    // ====== propriedades *Str (para o main) ======
 
 
-        //filename : String;
-        procedure SetDevice(const Value : Boolean);
-        procedure SetPOSX(value : integer);
-        procedure SetPOSY(value : integer);
-        procedure SetFixar(value : boolean);
-        procedure SetStay(value : boolean);
-        procedure SetLastFiles(value : string);
-        procedure SetFont(value : TFont);
-        procedure SetCHATGPT(value : String);
-        procedure SetDllPath( value : string);
-        procedure SetDllMyPath( value : string);
-        procedure SetDllPostPath( value : string);
-        procedure SetToolsFalar(value : boolean);
-        procedure Default();
+
+
+    FHostnameMy: String;
+    FBancoMy: String;
+    FUsernameMy: String;
+    FPasswordMy: String;
+
+    FHostnamePost: String;
+    FBancoPOST: String;
+    FUsernamePost: String;
+    FPasswordPost: String;
+    FSchemaPost: String;
+    FToolsFalar: Boolean;
+
+    function GetTaraStr: string;
+    function GetCalibracaoStr: string;
+    function GetPesoCalStr: string;
+
+    procedure SetTaraStr(const AValue: string);
+    procedure SetCalibracaoStr(const AValue: string);
+    procedure SetPesoCalStr(const AValue: string);
+
+    procedure SetDevice(const Value: Boolean);
+    procedure SetPOSX(value: integer);
+    procedure SetPOSY(value: integer);
+    procedure SetFixar(value: boolean);
+    procedure SetStay(value: boolean);
+    procedure SetLastFiles(value: string);
+    procedure SetFont(value: TFont);
+    procedure SetCHATGPT(value: String);
+    procedure SetDllPath(value: string);
+    procedure SetDllMyPath(value: string);
+    procedure SetDllPostPath(value: string);
+    procedure SetToolsFalar(value: boolean);
+    procedure Default;
   public
-        constructor create();
-        destructor Destroy();
-        procedure SalvaContexto(flag : boolean);
-        Procedure CarregaContexto();
-        procedure IdentificaArquivo(flag : boolean);
-        property device : boolean read ckdevice write SetDevice;
-        property posx : integer read FPosX write SetPOSX;
-        property posy : integer read FPosY write SetPOSY;
-        property fixar : boolean read FFixar write SetFixar;
-        property stay : boolean read FStay write SetStay;
-        property lastfiles: string read FLastFiles write SetLastFiles;
-        property Height: integer read FHeight write FHeight;
-        property Width : integer read FWidth write FWidth;
-        property RunScript : string read FRunScript write FRunScript;
-        property DebugScript : string read FDebugScript write FDebugScript;
-        property CleanScript : string read FCleanScript write FCleanScript;
-        property Install : string read FInstall write FInstall;
-        property Compile : string read FCompile write FCompile;
-        property Comport : string read FComport write FComport;
-        property Tara : string read FTara write FTara;
-        property Calibracao : string read FCalibracao write FCalibracao;
-        property Font : TFont read FFont write SetFont;
-        property CHATGPT: String read FCHATGPT write SetCHATGPT;
-        property DLLPath : String read FDllPath write SetDllPath;
-        property DLLMyPath : String read FDllMyPath write SetDllMyPath;
-        property DLLPostPath : String read FDllPostPath write SetDllPostPath;
+    constructor Create;
+    destructor Destroy; override;
 
-        property HostnameMy: string read FHostnameMy write FHostnameMy;
-        property BancoMy : String read FBancoMy write FBancoMy;
-        property UsernameMy : String read FUsernameMy write FUsernameMy;
-        property PasswordMy : String read FPasswordMy write FPasswordMy;
-        property HostnamePost : String read FHostnamePost write FHostnamePost;
-        property BancoPOST : String read FBancoPOST write FBancoPOST;
-        property UsernamePost: String read FUsernamePOST write FUsernamePost;
-        property PasswordPost : String read FPasswordPost write FPasswordPost;
-        property SchemaPost: String read FSchemaPost write FSchemaPost;
-        property ToolsFalar : Boolean read FToolsFalar write SetToolsFalar;
+    procedure SalvaContexto(flag: boolean);
+    procedure CarregaContexto;
+    procedure IdentificaArquivo(flag: boolean);
+
+    property device: boolean read ckdevice write SetDevice;
+    property posx: integer read FPosX write SetPOSX;
+    property posy: integer read FPosY write SetPOSY;
+    property fixar: boolean read FFixar write SetFixar;
+    property stay: boolean read FStay write SetStay;
+    property lastfiles: string read FLastFiles write SetLastFiles;
+    property Height: integer read FHeight write FHeight;
+    property Width: integer read FWidth write FWidth;
+
+    property RunScript: string read FRunScript write FRunScript;
+    property DebugScript: string read FDebugScript write FDebugScript;
+    property CleanScript: string read FCleanScript write FCleanScript;
+    property Install: string read FInstall write FInstall;
+    property Compile: string read FCompile write FCompile;
+
+    property Comport: string read FComport write FComport;
+
+    // ====== Mantém as antigas (se alguém usa) ======
+    property Tara: string read FTara write FTara;
+    property Calibracao: string read FCalibracao write FCalibracao;
+    property PesoCal: string read FPesoCal write FPesoCal; // <-- NOVO
+
+    // ====== As *Str que o main vai usar ======
+    property TaraStr: string read GetTaraStr write SetTaraStr;
+    property CalibracaoStr: string read GetCalibracaoStr write SetCalibracaoStr;
+    property PesoCalStr: string read GetPesoCalStr write SetPesoCalStr; // <-- NOVO
+
+    property Font: TFont read FFont write SetFont;
+    property CHATGPT: String read FCHATGPT write SetCHATGPT;
+
+    property DLLPath: String read FDllPath write SetDllPath;
+    property DLLMyPath: String read FDllMyPath write SetDllMyPath;
+    property DLLPostPath: String read FDllPostPath write SetDllPostPath;
+
+    property HostnameMy: string read FHostnameMy write FHostnameMy;
+    property BancoMy: String read FBancoMy write FBancoMy;
+    property UsernameMy: String read FUsernameMy write FUsernameMy;
+    property PasswordMy: String read FPasswordMy write FPasswordMy;
+
+    property HostnamePost: String read FHostnamePost write FHostnamePost;
+    property BancoPOST: String read FBancoPOST write FBancoPOST;
+    property UsernamePost: String read FUsernamePOST write FUsernamePost;
+    property PasswordPost: String read FPasswordPost write FPasswordPost;
+    property SchemaPost: String read FSchemaPost write FSchemaPost;
+
+    property ToolsFalar: Boolean read FToolsFalar write SetToolsFalar;
   end;
 
-  var
-    FSetMain : TSetMain;
-
+var
+  FSetMain: TSetMain;
 
 implementation
 
@@ -127,93 +151,123 @@ begin
   ckdevice := Value;
 end;
 
+// ====== getters/setters *Str ======
+function TSetMain.GetTaraStr: string;
+begin
+  Result := FTara;
+end;
+
+function TSetMain.GetCalibracaoStr: string;
+begin
+  Result := FCalibracao;
+end;
+
+function TSetMain.GetPesoCalStr: string;
+begin
+  Result := FPesoCal;
+end;
+
+procedure TSetMain.SetTaraStr(const AValue: string);
+begin
+  FTara := Trim(AValue);
+end;
+
+procedure TSetMain.SetCalibracaoStr(const AValue: string);
+begin
+  FCalibracao := Trim(AValue);
+end;
+
+procedure TSetMain.SetPesoCalStr(const AValue: string);
+begin
+  FPesoCal := Trim(AValue);
+end;
 
 //Valores default do codigo
-procedure TSetMain.Default();
+procedure TSetMain.Default;
 begin
-    ckdevice := false;
-    fixar:=false;
-    stay:=false;
-    FPosX :=100;
-    FPosY := 100;
-    FFixar :=false;
-    FStay := false;
+  ckdevice := False;
+  fixar := False;
+  stay := False;
+  FPosX := 100;
+  FPosY := 100;
+  FFixar := False;
+  FStay := False;
 
-    FDllPath:= ExtractFilePath(ApplicationName);
-    FDllMyPath:= ExtractFilePath(ApplicationName);
-    FDllPostPath:= ExtractFilePath(ApplicationName);
-    //FLastFiles :="";
-    //    FPATH : string;
-    FHeight :=400;
-    FWidth :=400;
-    FRunScript := '';   //Script de Run
-    FDebugScript :='';  //Script de Debug
-    FCleanScript :='';  //Script de Limpeza
-    FInstall :='';      //Script de Instalacao
-    FCompile :='';      //Script de Compilacao
+  FDllPath := ExtractFilePath(ApplicationName);
+  FDllMyPath := ExtractFilePath(ApplicationName);
+  FDllPostPath := ExtractFilePath(ApplicationName);
 
-    FComport := 'COM5';
-    FTara := '24594';
-    FCalibracao:= '4568';
-    if FFont = nil then
-    begin
-         FFONT := TFont.create();
+  FHeight := 400;
+  FWidth := 400;
 
-    end;
-    FCHATGPT:=''; //CHATGPT TOKEN
-    FToolsFalar := false;
+  FRunScript := '';
+  FDebugScript := '';
+  FCleanScript := '';
+  FInstall := '';
+  FCompile := '';
 
+  FComport := 'COM5';
+
+  // defaults como string
+  FTara := '24594';
+  FCalibracao := '4568';
+  FPesoCal := '1000'; // <-- NOVO (ex: 1000g = 1kg)
+
+  if FFont = nil then
+    FFONT := TFont.Create;
+
+  FCHATGPT := '';
+  FToolsFalar := False;
 end;
 
 procedure TSetMain.SetPOSX(value: integer);
 begin
-    Fposx := value;
+  Fposx := value;
 end;
 
 procedure TSetMain.SetPOSY(value: integer);
 begin
-    FposY := value;
+  FposY := value;
 end;
 
 procedure TSetMain.SetFixar(value: boolean);
 begin
-    FFixar := value;
+  FFixar := value;
 end;
 
 procedure TSetMain.SetStay(value: boolean);
 begin
-    FStay := value;
+  FStay := value;
 end;
 
 procedure TSetMain.SetLastFiles(value: string);
 begin
-  FLastFiles:= value;
+  FLastFiles := value;
 end;
 
 procedure TSetMain.SetFont(value: TFont);
 begin
-  //StringToFont(value,FFONT);
   FFont := value;
 end;
 
 procedure TSetMain.SetCHATGPT(value: String);
 begin
-  FCHATGPT:= value;
+  FCHATGPT := value;
 end;
 
 procedure TSetMain.SetDllPath(value: string);
 begin
-  FDllPath:= value;
+  FDllPath := value;
 end;
 
 procedure TSetMain.SetDllMyPath(value: string);
 begin
-  FDllMyPath:= value;
+  FDllMyPath := value;
 end;
 
 procedure TSetMain.SetDllPostPath(value: string);
 begin
-  FDllPostPath:= value;
+  FDllPostPath := value;
 end;
 
 procedure TSetMain.SetToolsFalar(value: boolean);
@@ -221,243 +275,200 @@ begin
   FToolsFalar := value;
 end;
 
-procedure TSetMain.CarregaContexto();
+procedure TSetMain.CarregaContexto;
 var
   posicao: integer;
 begin
-    if  BuscaChave(arquivo,'DEVICE:',posicao) then
-    begin
-      ckdevice := (RetiraInfo(arquivo.Strings[posicao])='1');
-    end;
-    if  BuscaChave(arquivo,'POSX:',posicao) then
-    begin
-      FPOSX := strtoint(RetiraInfo(arquivo.Strings[posicao]));
-    end;
-    if  BuscaChave(arquivo,'POSY:',posicao) then
-    begin
-      FPOSY := strtoint(RetiraInfo(arquivo.Strings[posicao]));
-    end;
-    if  BuscaChave(arquivo,'FIXAR:',posicao) then
-    begin
-      FFixar := StrToBool(RetiraInfo(arquivo.Strings[posicao]));
-    end;
-    if  BuscaChave(arquivo,'STAY:',posicao) then
-    begin
-      FStay := strtoBool(RetiraInfo(arquivo.Strings[posicao]));
-    end;
-    if  BuscaChave(arquivo,'LASTFILES:',posicao) then
-    begin
-      FLastFiles := RetiraInfo(arquivo.Strings[posicao]);
-    end;
-    if  BuscaChave(arquivo,'HEIGHT:',posicao) then
-    begin
-      FHEIGHT := strtoint(RetiraInfo(arquivo.Strings[posicao]));
-    end;
-    if  BuscaChave(arquivo,'WIDTH:',posicao) then
-    begin
-      FWidth := strtoint(RetiraInfo(arquivo.Strings[posicao]));
-    end;
-    if  BuscaChave(arquivo,'RUNSCRIPT:',posicao) then
-    begin
-      FRunScript := RetiraInfo(arquivo.Strings[posicao]);
-    end;
-    if  BuscaChave(arquivo,'DEBUGSCRIPT:',posicao) then
-    begin
-      FDebugScript := RetiraInfo(arquivo.Strings[posicao]);
-    end;
-    if  BuscaChave(arquivo,'CLEANSCRIPT:',posicao) then
-    begin
-      FCleanScript := RetiraInfo(arquivo.Strings[posicao]);
-    end;
-    if  BuscaChave(arquivo,'INSTALLSCRIPT:',posicao) then
-    begin
-      FInstall := RetiraInfo(arquivo.Strings[posicao]);
-    end;
-    if  BuscaChave(arquivo,'COMPILESCRIPT:',posicao) then
-    begin
-      FCompile := RetiraInfo(arquivo.Strings[posicao]);
-    end;
-    if  BuscaChave(arquivo,'COMPORT:',posicao) then
-    begin
-      FCOMPORT := RetiraInfo(arquivo.Strings[posicao]);
-    end;
-    if  BuscaChave(arquivo,'TARA:',posicao) then
-    begin
-      FTARA := RetiraInfo(arquivo.Strings[posicao]);
-    end;
-    if  BuscaChave(arquivo,'CALIBRACAO:',posicao) then
-    begin
-      FCalibracao := RetiraInfo(arquivo.Strings[posicao]);
-    end;
+  if BuscaChave(arquivo, 'DEVICE:', posicao) then
+    ckdevice := (RetiraInfo(arquivo.Strings[posicao]) = '1');
 
-    if  BuscaChave(arquivo,'FONT:',posicao) then
-    begin
-      StringToFont(RetiraInfo(arquivo.Strings[posicao]),FFONT);
-    end;
-    if  BuscaChave(arquivo,'CHATGPT:',posicao) then
-    begin
-      FCHATGPT := RetiraInfo(arquivo.Strings[posicao]);
-    end;
-    if  BuscaChave(arquivo,'DLLPATH:',posicao) then
-    begin
-      FDLLPATH := RetiraInfo(arquivo.Strings[posicao]);
-    end;
-    if  BuscaChave(arquivo,'DLLMYPATH:',posicao) then
-    begin
-      FDLLMyPATH := RetiraInfo(arquivo.Strings[posicao]);
-    end;
-    if  BuscaChave(arquivo,'DLLPOSTPATH:',posicao) then
-    begin
-      FDLLPOSTPATH := RetiraInfo(arquivo.Strings[posicao]);
-    end;
+  if BuscaChave(arquivo, 'POSX:', posicao) then
+    FPOSX := StrToInt(RetiraInfo(arquivo.Strings[posicao]));
 
-    if  BuscaChave(arquivo,'HOSTNAMEMY:',posicao) then
-    begin
-      FHostnameMy := RetiraInfo(arquivo.Strings[posicao]);
-    end;
-    if  BuscaChave(arquivo,'BANCOMY:',posicao) then
-    begin
-      FBancoMy := RetiraInfo(arquivo.Strings[posicao]);
-    end;
-    if  BuscaChave(arquivo,'USERNAMEMY:',posicao) then
-    begin
-      FUsernameMy := RetiraInfo(arquivo.Strings[posicao]);
-    end;
-    if  BuscaChave(arquivo,'PASSWORDMY:',posicao) then
-    begin
-      FPasswordMy := RetiraInfo(arquivo.Strings[posicao]);
-    end;
-    if  BuscaChave(arquivo,'HOSTNAMEPOST:',posicao) then
-    begin
-      FHostnamePost := RetiraInfo(arquivo.Strings[posicao]);
-    end;
-    if  BuscaChave(arquivo,'BANCOPOST:',posicao) then
-    begin
-      FBancoPost := RetiraInfo(arquivo.Strings[posicao]);
-    end;
-    if  BuscaChave(arquivo,'USERNAMEPOST:',posicao) then
-    begin
-      FUsernamePost := RetiraInfo(arquivo.Strings[posicao]);
-    end;
-    if  BuscaChave(arquivo,'PASSWORDPOST:',posicao) then
-    begin
-      FPasswordPost := RetiraInfo(arquivo.Strings[posicao]);
-    end;
-    if  BuscaChave(arquivo,'SCHEMAPOST:',posicao) then
-    begin
-      FSchemaPost := RetiraInfo(arquivo.Strings[posicao]);
-    end;
-    if  BuscaChave(arquivo,'TOOLSFALAR:',posicao) then
-    begin
-      FTOOLSFALAR := iif(RetiraInfo(arquivo.Strings[posicao])='0',false,true);
-    end;
+  if BuscaChave(arquivo, 'POSY:', posicao) then
+    FPOSY := StrToInt(RetiraInfo(arquivo.Strings[posicao]));
 
+  if BuscaChave(arquivo, 'FIXAR:', posicao) then
+    FFixar := StrToBool(RetiraInfo(arquivo.Strings[posicao]));
+
+  if BuscaChave(arquivo, 'STAY:', posicao) then
+    FStay := StrToBool(RetiraInfo(arquivo.Strings[posicao]));
+
+  if BuscaChave(arquivo, 'LASTFILES:', posicao) then
+    FLastFiles := RetiraInfo(arquivo.Strings[posicao]);
+
+  if BuscaChave(arquivo, 'HEIGHT:', posicao) then
+    FHEIGHT := StrToInt(RetiraInfo(arquivo.Strings[posicao]));
+
+  if BuscaChave(arquivo, 'WIDTH:', posicao) then
+    FWidth := StrToInt(RetiraInfo(arquivo.Strings[posicao]));
+
+  if BuscaChave(arquivo, 'RUNSCRIPT:', posicao) then
+    FRunScript := RetiraInfo(arquivo.Strings[posicao]);
+
+  if BuscaChave(arquivo, 'DEBUGSCRIPT:', posicao) then
+    FDebugScript := RetiraInfo(arquivo.Strings[posicao]);
+
+  if BuscaChave(arquivo, 'CLEANSCRIPT:', posicao) then
+    FCleanScript := RetiraInfo(arquivo.Strings[posicao]);
+
+  if BuscaChave(arquivo, 'INSTALLSCRIPT:', posicao) then
+    FInstall := RetiraInfo(arquivo.Strings[posicao]);
+
+  if BuscaChave(arquivo, 'COMPILESCRIPT:', posicao) then
+    FCompile := RetiraInfo(arquivo.Strings[posicao]);
+
+  if BuscaChave(arquivo, 'COMPORT:', posicao) then
+    FCOMPORT := RetiraInfo(arquivo.Strings[posicao]);
+
+  if BuscaChave(arquivo, 'TARA:', posicao) then
+    FTARA := RetiraInfo(arquivo.Strings[posicao]);
+
+  if BuscaChave(arquivo, 'CALIBRACAO:', posicao) then
+    FCalibracao := RetiraInfo(arquivo.Strings[posicao]);
+
+  // ====== NOVO ======
+  if BuscaChave(arquivo, 'PESOCAL:', posicao) then
+    FPesoCal := RetiraInfo(arquivo.Strings[posicao]);
+
+  if BuscaChave(arquivo, 'FONT:', posicao) then
+    StringToFont(RetiraInfo(arquivo.Strings[posicao]), FFONT);
+
+  if BuscaChave(arquivo, 'CHATGPT:', posicao) then
+    FCHATGPT := RetiraInfo(arquivo.Strings[posicao]);
+
+  if BuscaChave(arquivo, 'DLLPATH:', posicao) then
+    FDLLPATH := RetiraInfo(arquivo.Strings[posicao]);
+
+  if BuscaChave(arquivo, 'DLLMYPATH:', posicao) then
+    FDLLMyPATH := RetiraInfo(arquivo.Strings[posicao]);
+
+  if BuscaChave(arquivo, 'DLLPOSTPATH:', posicao) then
+    FDLLPOSTPATH := RetiraInfo(arquivo.Strings[posicao]);
+
+  if BuscaChave(arquivo, 'HOSTNAMEMY:', posicao) then
+    FHostnameMy := RetiraInfo(arquivo.Strings[posicao]);
+
+  if BuscaChave(arquivo, 'BANCOMY:', posicao) then
+    FBancoMy := RetiraInfo(arquivo.Strings[posicao]);
+
+  if BuscaChave(arquivo, 'USERNAMEMY:', posicao) then
+    FUsernameMy := RetiraInfo(arquivo.Strings[posicao]);
+
+  if BuscaChave(arquivo, 'PASSWORDMY:', posicao) then
+    FPasswordMy := RetiraInfo(arquivo.Strings[posicao]);
+
+  if BuscaChave(arquivo, 'HOSTNAMEPOST:', posicao) then
+    FHostnamePost := RetiraInfo(arquivo.Strings[posicao]);
+
+  if BuscaChave(arquivo, 'BANCOPOST:', posicao) then
+    FBancoPost := RetiraInfo(arquivo.Strings[posicao]);
+
+  if BuscaChave(arquivo, 'USERNAMEPOST:', posicao) then
+    FUsernamePost := RetiraInfo(arquivo.Strings[posicao]);
+
+  if BuscaChave(arquivo, 'PASSWORDPOST:', posicao) then
+    FPasswordPost := RetiraInfo(arquivo.Strings[posicao]);
+
+  if BuscaChave(arquivo, 'SCHEMAPOST:', posicao) then
+    FSchemaPost := RetiraInfo(arquivo.Strings[posicao]);
+
+  if BuscaChave(arquivo, 'TOOLSFALAR:', posicao) then
+    FTOOLSFALAR := iif(RetiraInfo(arquivo.Strings[posicao]) = '0', False, True);
 end;
-
 
 procedure TSetMain.IdentificaArquivo(flag: boolean);
 begin
-  //filename := 'Work'+ FormatDateTime('ddmmyy',now())+'.cfg';
   {$ifdef Darwin}
-    //Nao testado ainda
-    Fpath :=GetAppConfigDir(false);
-    if not(FileExists(FPATH)) then
-    begin
-      createdir(fpath);
-    end;
-  {$ENDIF}
-  {$IFDEF LINUX}
-      //Fpath :='/home/';
-      //Fpath := GetUserDir()
-      Fpath :=GetAppConfigDir(false);
-      if not(FileExists(FPATH)) then
-      begin
-         createdir(fpath);
-      end;
-  {$ENDIF}
-  {$IFDEF WINDOWS}
-      Fpath :=GetAppConfigDir(false);
-      if not(FileExists(FPATH)) then
-      begin
-         createdir(fpath);
-      end;
-  {$ENDIF}
-  if (FileExists(fpath+filename)) then
+  Fpath := GetAppConfigDir(False);
+  if not (FileExists(FPATH)) then
+    CreateDir(fpath);
+  {$endif}
+
+  {$ifdef Linux}
+  Fpath := GetAppConfigDir(False);
+  if not (FileExists(FPATH)) then
+    CreateDir(fpath);
+  {$endif}
+
+  {$ifdef Windows}
+  Fpath := GetAppConfigDir(False);
+  if not (FileExists(FPATH)) then
+    CreateDir(fpath);
+  {$endif}
+
+  if FileExists(fpath + filename) then
   begin
-    arquivo.LoadFromFile(fpath+filename);
-    CarregaContexto();
+    arquivo.LoadFromFile(fpath + filename);
+    CarregaContexto;
   end
   else
   begin
-    default();
-    //SalvaContexto(false);
+    Default;
   end;
-
 end;
 
-//Metodo construtor
-constructor TSetMain.create();
+constructor TSetMain.Create;
 begin
-    arquivo := TStringList.create();
-    FFONT := TFont.create();
-    IdentificaArquivo(true);
+  arquivo := TStringList.Create;
+  FFONT := TFont.Create;
+  IdentificaArquivo(True);
 end;
-
 
 procedure TSetMain.SalvaContexto(flag: boolean);
 begin
-  if (flag) then
-  begin
-    IdentificaArquivo(false);
-  end;
-  //filename := 'Work'+ FormatDateTime('ddmmyy',now())+'.cfg';
+  if flag then
+    IdentificaArquivo(False);
+
   arquivo.Clear;
-  arquivo.Append('DEVICE:'+iif(ckdevice,'1','0'));
-  arquivo.Append('POSX:'+inttostr(FPOSX));
-  arquivo.Append('POSY:'+inttostr(FPOSY));
-  arquivo.Append('FIXAR:'+booltostr(FFixar));
-  arquivo.Append('STAY:'+booltostr(FStay));
-  arquivo.Append('LASTFILES:'+FLastFiles);
-  arquivo.Append('HEIGHT:'+inttostr(FHEIGHT));
-  arquivo.Append('WIDTH:'+inttostr(FWIDTH));
-  arquivo.Append('RUNSCRIPT:'+FRunScript);
-  arquivo.Append('DEBUGSCRIPT:'+FDebugScript);
-  arquivo.Append('CLEANSCRIPT:'+FCleanScript);
-  arquivo.Append('INSTALLSCRIPT:'+FInstall);
-  arquivo.Append('COMPILESCRIPT:'+FCompile);
-  arquivo.Append('COMPORT:'+FComport);
-  arquivo.Append('TARA:'+FTARA);
-  arquivo.Append('CALIBRACAO:'+FCALIBRACAO);
-  arquivo.Append('FONT:'+FontToString(FFONT));
-  arquivo.Append('CHATGPT:'+FCHATGPT);
-  arquivo.Append('DLLPATH:'+FDLLPATH);
-  arquivo.Append('DLLMYPATH:'+FDLLMYPATH);
-  arquivo.Append('DLLPOSTPATH:'+FDLLPOSTPATH);
+  arquivo.Append('DEVICE:' + iif(ckdevice, '1', '0'));
+  arquivo.Append('POSX:' + IntToStr(FPOSX));
+  arquivo.Append('POSY:' + IntToStr(FPOSY));
+  arquivo.Append('FIXAR:' + BoolToStr(FFixar));
+  arquivo.Append('STAY:' + BoolToStr(FStay));
+  arquivo.Append('LASTFILES:' + FLastFiles);
+  arquivo.Append('HEIGHT:' + IntToStr(FHEIGHT));
+  arquivo.Append('WIDTH:' + IntToStr(FWIDTH));
+  arquivo.Append('RUNSCRIPT:' + FRunScript);
+  arquivo.Append('DEBUGSCRIPT:' + FDebugScript);
+  arquivo.Append('CLEANSCRIPT:' + FCleanScript);
+  arquivo.Append('INSTALLSCRIPT:' + FInstall);
+  arquivo.Append('COMPILESCRIPT:' + FCompile);
+  arquivo.Append('COMPORT:' + FComport);
 
-  arquivo.Append('HOSTNAMEMY:'+FHostnameMy);
-  arquivo.Append('BANCOMY:'+FBancoMy);
-  arquivo.Append('USERNAMEMY:'+FUsernameMy);
-  arquivo.Append('PASSWORDMY:'+FPasswordMy);
+  arquivo.Append('TARA:' + FTARA);
+  arquivo.Append('CALIBRACAO:' + FCALIBRACAO);
 
-  arquivo.Append('HOSTNAMEPOST:'+FHostnamePOST);
-  arquivo.Append('BANCOPOST:'+FBancoPOST);
-  arquivo.Append('USERNAMEPOST:'+FUsernamePOST);
-  arquivo.Append('PASSWORDPOST:'+FPasswordPOST);
-  arquivo.Append('SCHEMAPOST:'+FSchemaPost);
-  arquivo.Append('TOOLSFALAR:'+iif(FToolsFalar,'1','0'));
-  arquivo.SaveToFile(fpath+filename);
+  // ====== NOVO ======
+  arquivo.Append('PESOCAL:' + FPesoCal);
+
+  arquivo.Append('FONT:' + FontToString(FFONT));
+  arquivo.Append('CHATGPT:' + FCHATGPT);
+  arquivo.Append('DLLPATH:' + FDLLPATH);
+  arquivo.Append('DLLMYPATH:' + FDLLMYPATH);
+  arquivo.Append('DLLPOSTPATH:' + FDLLPOSTPATH);
+
+  arquivo.Append('HOSTNAMEMY:' + FHostnameMy);
+  arquivo.Append('BANCOMY:' + FBancoMy);
+  arquivo.Append('USERNAMEMY:' + FUsernameMy);
+  arquivo.Append('PASSWORDMY:' + FPasswordMy);
+
+  arquivo.Append('HOSTNAMEPOST:' + FHostnamePOST);
+  arquivo.Append('BANCOPOST:' + FBancoPOST);
+  arquivo.Append('USERNAMEPOST:' + FUsernamePOST);
+  arquivo.Append('PASSWORDPOST:' + FPasswordPOST);
+  arquivo.Append('SCHEMAPOST:' + FSchemaPost);
+  arquivo.Append('TOOLSFALAR:' + iif(FToolsFalar, '1', '0'));
+
+  arquivo.SaveToFile(fpath + filename);
 end;
 
 destructor TSetMain.Destroy;
 begin
-  //SalvaContexto(false);
-  arquivo.free;
+  arquivo.Free;
   arquivo := nil;
-  FFONT.free;
+  FFONT.Free;
+  inherited Destroy;
 end;
 
 end.
-
-
-
-

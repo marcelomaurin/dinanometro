@@ -7,8 +7,8 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls, StdCtrls,
   ExtCtrls, Menus, TAGraph, indSliders, LedNumber, indGnouMeter, indLCDDisplay,
-  A3nalogGauge, IndLed, LazSerial, LazSynaSer,TATypes, TASeries, TACustomSeries,  TADrawUtils,
-  TAChartUtils, setmain;
+  A3nalogGauge, IndLed, LazSerial, LazSynaSer, TATypes, TASeries, TACustomSeries,
+  TADrawUtils, TAChartUtils, setmain;
 
 type
 
@@ -18,6 +18,7 @@ type
     A3nalogGauge1: TA3nalogGauge;
     btTara: TButton;
     btCalibra: TButton;
+    btsalvar: TButton;
     Chart1: TChart;
     edPesoCal: TEdit;
     edPorta: TEdit;
@@ -29,6 +30,8 @@ type
     Label1: TLabel;
     Label10: TLabel;
     Label11: TLabel;
+    Label12: TLabel;
+    lbversao: TLabel;
     Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
@@ -49,9 +52,11 @@ type
     TabSheet3: TTabSheet;
     tsSobre: TTabSheet;
     procedure btCalibraClick(Sender: TObject);
+    procedure btsalvarClick(Sender: TObject);
     procedure btTaraClick(Sender: TObject);
     procedure edCalibracaoChange(Sender: TObject);
     procedure edPortaChange(Sender: TObject);
+    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -62,20 +67,31 @@ type
     procedure milimparClick(Sender: TObject);
     procedure misalvarClick(Sender: TObject);
   private
+    // ====== BUFFER SERIAL ======
+    FSerialBuffer: string;
+
+    // ====== CONFIG/SETTINGS ======
+    FSetMain: TSetMain;
+
     function GramasParaNewtons(pesoGramas: longint): longint;
-    procedure GeraLinha(values: longint);
+    function GramasParaKgf(pesoGramas: Int64): Double;
+
+    procedure GeraLinhaKgf(valorKgf: Double);
     procedure CriaLinha();
     procedure ResetPeso();
+    procedure LimpaBufferSerial;
   public
-    peso : longint;
-    forca : longint;
-    referencia : LongInt;
+    peso: longint;
+    forca: longint;
+    referencia: LongInt;
     LineSeries: TLineSeries;
-
   end;
 
 var
   frmmain: Tfrmmain;
+
+Const
+  Versao = '1.4';
 
 implementation
 
@@ -83,117 +99,174 @@ implementation
 
 { Tfrmmain }
 
-procedure Tfrmmain.GeraLinha(values: longint);
+procedure Tfrmmain.LimpaBufferSerial;
 begin
-   LineSeries.Add(values, 'Newton');  // Adiciona o valor e o rótulo (nome do grupo)
+  FSerialBuffer := '';
+end;
 
+function Tfrmmain.GramasParaKgf(pesoGramas: Int64): Double;
+begin
+  // 1 kgf = 1 kg sob gravidade padrão -> em "kgf" numericamente é kg
+  // gramas -> kg = /1000
+  Result := pesoGramas / 1000.0;
+end;
+
+procedure Tfrmmain.GeraLinhaKgf(valorKgf: Double);
+var
+  rotuloX: string;
+begin
+  if not Assigned(LineSeries) then Exit;
+
+  // X = leitura (1,2,3...) como rótulo
+  rotuloX := IntToStr(LineSeries.Count + 1);
+
+  // Adiciona ponto: Y = kgf, rótulo = número da leitura
+  LineSeries.Add(valorKgf, rotuloX);
 end;
 
 procedure Tfrmmain.CriaLinha;
 begin
-    Chart1.ClearSeries;  // Limpa as séries existentes no gráfico
+  Chart1.ClearSeries;
 
-    // Cria uma nova série de linha e a adiciona ao gráfico
-    LineSeries := TLineSeries.Create(Chart1);
-    Chart1.AddSeries(LineSeries);
+  LineSeries := TLineSeries.Create(Chart1);
+  Chart1.AddSeries(LineSeries);
 
-    // Configurações do título e aparência da série de linha
-    LineSeries.Title := 'Força aplicada';
-    LineSeries.ShowPoints := True;
-    LineSeries.LinePen.Width := 2;
+  LineSeries.Title := 'Força aplicada';
+  LineSeries.ShowPoints := True;
+  LineSeries.LinePen.Width := 2;
 
-    // Configurações da legenda
-    Chart1.Legend.Visible := True;
+  Chart1.Legend.Visible := True;
 
-    // Configurando os títulos dos eixos
-    Chart1.BottomAxis.Title.Caption := 'Tempo (s)'; // Define o título do eixo X
-    Chart1.LeftAxis.Title.Caption := 'Força (mN)';   // Define o título do eixo Y
+  // ======= EIXOS =======
+  Chart1.BottomAxis.Title.Caption := 'Leitura';
+  Chart1.LeftAxis.Title.Caption := 'Força (kgf)';
 
-    // A propriedade Alignment pode ser usada para ajustar a posição do título do eixo, se necessário
-    // Por exemplo, para centralizar o título do eixo X abaixo do eixo:
-    Chart1.BottomAxis.Title.Alignment := taCenter;
-
-    // E para alinhar o título do eixo Y no meio da lateral esquerda:
-    Chart1.LeftAxis.Title.Alignment := taCenter;
-
-    // Outras configurações podem ser adicionadas aqui, conforme necessário
+  Chart1.BottomAxis.Title.Alignment := taCenter;
+  Chart1.LeftAxis.Title.Alignment := taCenter;
 end;
 
 procedure Tfrmmain.ResetPeso();
 begin
-  edTara.text := '0';
-  edCalibracao.text := '0';
+  edTara.Text := '0';
+  edCalibracao.Text := '0';
 end;
-
 
 function Tfrmmain.GramasParaNewtons(pesoGramas: longint): longint;
 const
-  g = 9.81; // Aceleração devido à gravidade em m/s^2
+  g = 9.81;
 begin
-  // Converte gramas para quilogramas e calcula a força em newtons
-  Result := trunc((pesoGramas ) * g);
+  Result := Trunc((pesoGramas) * g);
 end;
-
 
 procedure Tfrmmain.indLed1Click(Sender: TObject);
 begin
-  LazSerial1.device := edPorta.text;
-  if(LazSerial1.Active) then
+  LazSerial1.Device := edPorta.Text;
+
+  if LazSerial1.Active then
   begin
-    LazSerial1.close;
+    LazSerial1.Close;
+    LimpaBufferSerial;
   end
   else
   begin
     LazSerial1.Open;
+    LimpaBufferSerial;
     CriaLinha;
   end;
-
 end;
 
 procedure Tfrmmain.btTaraClick(Sender: TObject);
 begin
   ResetPeso();
-  edTara.Text := Inttostr(referencia);
+  edTara.Text := IntToStr(referencia);
 end;
 
 procedure Tfrmmain.btCalibraClick(Sender: TObject);
 var
-  fator : longint;
-
+  fator: longint;
 begin
-  fator := trunc((referencia-strtoint(edtara.text)) / strtoint(edPesoCal.text ));
-  edCalibracao.text := inttostr(fator);
+  if StrToIntDef(edPesoCal.Text, 0) = 0 then Exit;
 
+  fator := Trunc((referencia - StrToIntDef(edTara.Text, 0)) / StrToIntDef(edPesoCal.Text, 1));
+  edCalibracao.Text := IntToStr(fator);
+end;
+
+procedure Tfrmmain.btsalvarClick(Sender: TObject);
+begin
+  if Assigned(FSetMain) then
+  begin
+    FSetMain.Comport := edPorta.Text;
+
+    // GRAVA EXATAMENTE o que está nos edits (STRING)
+    FSetMain.TaraStr := Trim(edTara.Text);
+    FSetMain.CalibracaoStr := Trim(edCalibracao.Text);
+    FSetMain.PesoCalStr := Trim(edPesoCal.Text); // <-- NOVO
+
+    FSetMain.SalvaContexto(False);
+
+  end;
 end;
 
 procedure Tfrmmain.edCalibracaoChange(Sender: TObject);
 begin
-
-
+  // (vazio)
 end;
 
 procedure Tfrmmain.edPortaChange(Sender: TObject);
 begin
+  // (vazio)
+end;
 
+procedure Tfrmmain.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+begin
+  if(LazSerial1.Active)   then
+  begin
+    LazSerial1.close;
+  end;
 end;
 
 procedure Tfrmmain.FormCreate(Sender: TObject);
 begin
-  FSetMain := TSetMain.create();
-  FSetMain.CarregaContexto();
-  edPorta.text := FSetMain.Comport;
-  edTara.text := FSetMain.Tara;
-  edCalibracao.text := FSetMain.Calibracao;
+  FSerialBuffer := '';
+  lbversao.Caption:= versao;
 
+  FSetMain := TSetMain.Create;
+  FSetMain.CarregaContexto;
+
+  edPorta.Text := FSetMain.Comport;
+
+  // LÊ COMO STRING (CFG)
+  edTara.Text := FSetMain.TaraStr;
+  edCalibracao.Text := FSetMain.CalibracaoStr;
+  edPesoCal.Text := FSetMain.PesoCalStr; // <-- NOVO
 end;
 
 procedure Tfrmmain.FormDestroy(Sender: TObject);
 begin
+  // garante que o valor atual digitado no Edit seja gravado
+  try
+    ActiveControl := nil;
+  except
+  end;
+  Application.ProcessMessages;
 
-  FSetMain.Comport := edPorta.text;
-  FSetMain.Tara:= edTara.text;
-  FSETMain.Calibracao:= edCalibracao.text;
-  FSetMain.SalvaContexto(false);
+  if Assigned(FSetMain) then
+  begin
+    FSetMain.Comport := edPorta.Text;
+
+    // GRAVA EXATAMENTE o que está nos edits (STRING)
+    FSetMain.TaraStr := Trim(edTara.Text);
+    FSetMain.CalibracaoStr := Trim(edCalibracao.Text);
+    FSetMain.PesoCalStr := Trim(edPesoCal.Text); // <-- NOVO
+
+    FSetMain.SalvaContexto(False);
+    FreeAndNil(FSetMain);
+  end;
+
+  if LazSerial1.Active then
+    LazSerial1.Close;
+
+  LimpaBufferSerial;
 end;
 
 procedure Tfrmmain.FormShow(Sender: TObject);
@@ -203,88 +276,93 @@ end;
 
 procedure Tfrmmain.LazSerial1RxData(Sender: TObject);
 var
-  lista : TStringList;
-  valor : string;
-  valor1: string;
-  posicao : integer;
-  valor2: longint;
+  s, linha, numStr: string;
+  p, posPeso: Integer;
+  vPesoLido: Integer;
+  kgf: Double;
 begin
-  if(LazSerial1.DataAvailable) then
-  begin
-   lista := TStringlist.create();
-   valor :=    LazSerial1.ReadData;
-   lista.Text :=  valor;
+  if not LazSerial1.DataAvailable then
+    Exit;
 
-   if (lista.Count>0) then
-   begin
-     if(lista.Strings[0]<>'') then
-     begin
-       try
-         valor1 := trim(lista.Strings[0]);
-         if(valor1<>'') then
-         begin
-           posicao := pos('peso:', valor1);
-           if(posicao>-1) then
-           begin
-             valor := copy(valor1,posicao+6,Length(valor1));
-             if(TryStrToInt(valor, peso) ) then
-             begin
-               if(strtoint(edCalibracao.text)<>0) then
-               begin
-                 referencia := peso;
-                 peso := trunc(( (referencia - strtoint(edTara.Text)) / strtoint(edCalibracao.text))  ) ;
+  s := LazSerial1.ReadData;
+  if s = '' then
+    Exit;
 
-               end
-               else
-               begin
-                 referencia := peso;
-                 peso := (referencia - strtoint(edTara.Text) )  ;
-               end;
-               forca := GramasParaNewtons(peso);
-               LedForca.Caption:=  inttostr(forca);
-               ledPeso.Caption := inttostr(peso);
-               indGnouMeter1.Value:= forca;
-               A3nalogGauge1.Position:=forca;
-               indGnouMeter1.Value:=forca;
-               GeraLinha(forca);
-               //sleep(2000);
-               //application.ProcessMessages;
-             end;
+  FSerialBuffer := FSerialBuffer + s;
 
-           end;
-         end;
-       finally
-       end;
-     end;
+  // só processa quando tiver LF (#10)
+  p := Pos(#10, FSerialBuffer);
+  if p = 0 then
+    Exit;
 
-   end;
-  end;
+  linha := Copy(FSerialBuffer, 1, p - 1);
 
+  // remove CR se vier CRLF
+  if (linha <> '') and (linha[Length(linha)] = #13) then
+    Delete(linha, Length(linha), 1);
 
+  // remove do buffer até o LF (inclusive)
+  Delete(FSerialBuffer, 1, p);
+
+  linha := Trim(linha);
+  if linha = '' then
+    Exit;
+
+  posPeso := Pos('Peso:', linha);
+  if posPeso <= 0 then
+    Exit;
+
+  numStr := Trim(Copy(linha, posPeso + 5, MaxInt));
+  if numStr = '' then
+    Exit;
+
+  if not TryStrToInt(numStr, vPesoLido) then
+    Exit;
+
+  referencia := vPesoLido;
+
+  if StrToIntDef(edCalibracao.Text, 0) <> 0 then
+    peso := Trunc((referencia - StrToIntDef(edTara.Text, 0)) / StrToIntDef(edCalibracao.Text, 1))
+  else
+    peso := (referencia - StrToIntDef(edTara.Text, 0));
+
+  // ======= EXIBIÇÃO =======
+  kgf := GramasParaKgf(peso);
+
+  LedForca.Caption := FormatFloat('0.###', kgf); // kgf
+  ledPeso.Caption := IntToStr(peso div 1000);   // kg (inteiro)
+
+  indGnouMeter1.Value := peso;
+  A3nalogGauge1.Position := peso;
+
+  // ======= GRÁFICO: Y em kgf, X em leitura =======
+  GeraLinhaKgf(kgf);
+
+  Application.ProcessMessages;
 end;
 
 procedure Tfrmmain.LazSerial1Status(Sender: TObject; Reason: THookSerialReason;
   const Value: string);
 begin
-  if (Reason= HR_Connect) then
+  if (Reason = HR_Connect) then
+    indLed1.LedValue := True;
+
+  if (Reason = HR_SerialClose) then
   begin
-    indLed1.LedValue:=true;
-  end;
-  if (Reason= HR_SerialClose) then
-  begin
-    indLed1.LedValue:=false;
+    indLed1.LedValue := False;
+    LimpaBufferSerial;
   end;
 end;
 
 procedure Tfrmmain.milimparClick(Sender: TObject);
 begin
-      LineSeries.Clear;
+  if Assigned(LineSeries) then
+    LineSeries.Clear;
 end;
 
 procedure Tfrmmain.misalvarClick(Sender: TObject);
 begin
-
+  // (vazio)
 end;
 
 end.
-
