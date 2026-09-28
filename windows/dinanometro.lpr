@@ -10,7 +10,7 @@ uses
   athreads,
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, tachartlazaruspkg, LazSerialPort, main, setmain, funcoes
+  Forms, tachartlazaruspkg, LazSerialPort, main, setmain, protocolo
   { you can add units after this };
 
 {$R *.res}

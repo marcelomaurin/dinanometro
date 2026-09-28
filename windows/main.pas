@@ -8,9 +8,15 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls, StdCtrls,
   ExtCtrls, Menus, TAGraph, indSliders, LedNumber, indGnouMeter, indLCDDisplay,
   A3nalogGauge, IndLed, LazSerial, LazSynaSer, TATypes, TASeries, TACustomSeries,
-  TADrawUtils, TAChartUtils, setmain;
+  TADrawUtils, TAChartUtils, setmain, protocolo;
 
 type
+
+  TAmostra = record
+    TempoS: Double;
+    Bruto: Int64;
+    ForcaN: Double;
+  end;
 
   { Tfrmmain }
 
@@ -20,8 +26,9 @@ type
     btCalibra: TButton;
     btsalvar: TButton;
     Chart1: TChart;
+    edMedia: TEdit;
     edPesoCal: TEdit;
-    edPorta: TEdit;
+    edPorta: TComboBox;
     edTara: TEdit;
     edCalibracao: TEdit;
     Image1: TImage;
@@ -31,6 +38,9 @@ type
     Label10: TLabel;
     Label11: TLabel;
     Label12: TLabel;
+    Label13: TLabel;
+    lbPico: TLabel;
+    lbStatus: TLabel;
     lbversao: TLabel;
     Label2: TLabel;
     Label3: TLabel;
@@ -45,6 +55,7 @@ type
     ledPeso: TLEDNumber;
     Memo1: TMemo;
     milimpar: TMenuItem;
+    misalvar: TMenuItem;
     PageControl1: TPageControl;
     PopupMenu1: TPopupMenu;
     TabSheet1: TTabSheet;
@@ -56,6 +67,7 @@ type
     procedure btTaraClick(Sender: TObject);
     procedure edCalibracaoChange(Sender: TObject);
     procedure edPortaChange(Sender: TObject);
+    procedure edPortaDropDown(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -67,31 +79,55 @@ type
     procedure milimparClick(Sender: TObject);
     procedure misalvarClick(Sender: TObject);
   private
-    // ====== BUFFER SERIAL ======
     FSerialBuffer: string;
-
-    // ====== CONFIG/SETTINGS ======
     FSetMain: TSetMain;
 
-    function GramasParaNewtons(pesoGramas: longint): longint;
-    function GramasParaKgf(pesoGramas: Int64): Double;
+    // Calibracao: gramas = (bruto - FTara) / FFator
+    FTara: Double;           // contagens do ADC sem carga
+    FFator: Double;          // contagens por grama (0 = nao calibrado)
+    FPesoCal: Double;        // gramas
+    FAtualizandoEdits: Boolean;
+    FPrecisaTara: Boolean;   // cfg da versao 1: tara antiga nao vale mais
 
-    procedure GeraLinhaKgf(valorKgf: Double);
-    procedure CriaLinha();
-    procedure ResetPeso();
+    FJanelaBruto: TJanelaMedia;   // ultimas leituras brutas (tara/calibracao)
+    FSuavizacao: TJanelaMedia;    // media movel da forca exibida
+
+    // Base de tempo do grafico
+    FT0Ms: Int64;            // tempo do firmware da primeira amostra
+    FUltimoMs: Int64;
+    FUltimoTempoS: Double;
+    FT0Tick: QWord;          // para firmware 1.x (sem tempo)
+
+    FDados: array of TAmostra;
+    FNumDados: Integer;
+    FPicoN: Double;
+    FUltimaForcaN: Double;
+
+    procedure CriaLinha;
+    procedure ReiniciaMedicao;
     procedure LimpaBufferSerial;
+    procedure AtualizaListaPortas;
+    procedure LeParametrosDosEdits;
+    procedure EscreveParametrosNosEdits;
+    procedure SalvaConfiguracao;
+    procedure ProcessaAmostra(ATempoS: Double; ABruto: Int64);
+    procedure AtualizaMostradores;
+    procedure MostraStatus(const ATexto: string; AAlerta: Boolean);
+    function ExigeLeituras: Boolean;
   public
-    peso: longint;
-    forca: longint;
-    referencia: LongInt;
     LineSeries: TLineSeries;
+    procedure ExportaCSV(const AArquivo: string);
   end;
 
 var
   frmmain: Tfrmmain;
 
 Const
-  Versao = '1.4';
+  Versao = '2.0';
+
+  // Amostras usadas na media da tara e da calibracao
+  // (2 s a 10 SPS, 0,25 s a 80 SPS)
+  AMOSTRAS_TARA = 20;
 
 implementation
 
@@ -104,24 +140,13 @@ begin
   FSerialBuffer := '';
 end;
 
-function Tfrmmain.GramasParaKgf(pesoGramas: Int64): Double;
+procedure Tfrmmain.MostraStatus(const ATexto: string; AAlerta: Boolean);
 begin
-  // 1 kgf = 1 kg sob gravidade padrão -> em "kgf" numericamente é kg
-  // gramas -> kg = /1000
-  Result := pesoGramas / 1000.0;
-end;
-
-procedure Tfrmmain.GeraLinhaKgf(valorKgf: Double);
-var
-  rotuloX: string;
-begin
-  if not Assigned(LineSeries) then Exit;
-
-  // X = leitura (1,2,3...) como rótulo
-  rotuloX := IntToStr(LineSeries.Count + 1);
-
-  // Adiciona ponto: Y = kgf, rótulo = número da leitura
-  LineSeries.Add(valorKgf, rotuloX);
+  lbStatus.Caption := ATexto;
+  if AAlerta then
+    lbStatus.Font.Color := clRed
+  else
+    lbStatus.Font.Color := clDefault;
 end;
 
 procedure Tfrmmain.CriaLinha;
@@ -132,84 +157,192 @@ begin
   Chart1.AddSeries(LineSeries);
 
   LineSeries.Title := 'Força aplicada';
-  LineSeries.ShowPoints := True;
+  LineSeries.ShowPoints := False;
   LineSeries.LinePen.Width := 2;
 
   Chart1.Legend.Visible := True;
 
-  // ======= EIXOS =======
-  Chart1.BottomAxis.Title.Caption := 'Leitura';
-  Chart1.LeftAxis.Title.Caption := 'Força (kgf)';
-
+  Chart1.BottomAxis.Title.Caption := 'Tempo (s)';
+  Chart1.LeftAxis.Title.Caption := 'Força (N)';
+  Chart1.BottomAxis.Title.Visible := True;
+  Chart1.LeftAxis.Title.Visible := True;
   Chart1.BottomAxis.Title.Alignment := taCenter;
   Chart1.LeftAxis.Title.Alignment := taCenter;
 end;
 
-procedure Tfrmmain.ResetPeso();
+procedure Tfrmmain.ReiniciaMedicao;
 begin
-  edTara.Text := '0';
-  edCalibracao.Text := '0';
+  FT0Ms := -1;
+  FUltimoMs := -1;
+  FUltimoTempoS := 0;
+  FT0Tick := 0;
+  FNumDados := 0;
+  SetLength(FDados, 0);
+  FPicoN := 0;
+  FSuavizacao.Limpa;
+  if Assigned(LineSeries) then
+    LineSeries.Clear;
+  lbPico.Caption := 'Pico: ' + FormatFloat('0.00', 0) + ' N';
 end;
 
-function Tfrmmain.GramasParaNewtons(pesoGramas: longint): longint;
-const
-  g = 9.81;
+procedure Tfrmmain.AtualizaListaPortas;
+var
+  portas: TStringList;
+  atual: string;
 begin
-  Result := Trunc((pesoGramas) * g);
+  atual := edPorta.Text;
+  portas := TStringList.Create;
+  try
+    portas.CommaText := GetSerialPortNames;
+    portas.Sort;
+    edPorta.Items.Assign(portas);
+  finally
+    portas.Free;
+  end;
+  edPorta.Text := atual;
+end;
+
+procedure Tfrmmain.LeParametrosDosEdits;
+var
+  n: Integer;
+begin
+  FTara := StrToFloatFlex(edTara.Text, 0);
+  FFator := StrToFloatFlex(edCalibracao.Text, 0);
+  FPesoCal := StrToFloatFlex(edPesoCal.Text, 0);
+
+  n := StrToIntDef(Trim(edMedia.Text), 1);
+  if n < 1 then n := 1;
+  if n > 200 then n := 200;
+  if n <> FSuavizacao.Capacidade then
+    FSuavizacao.Capacidade := n;
+end;
+
+procedure Tfrmmain.EscreveParametrosNosEdits;
+begin
+  FAtualizandoEdits := True;
+  try
+    edTara.Text := FloatToStrPonto(FTara, 1);
+    edCalibracao.Text := FloatToStrPonto(FFator, 4);
+  finally
+    FAtualizandoEdits := False;
+  end;
+end;
+
+procedure Tfrmmain.SalvaConfiguracao;
+begin
+  if not Assigned(FSetMain) then Exit;
+
+  FSetMain.Comport := Trim(edPorta.Text);
+  FSetMain.TaraStr := Trim(edTara.Text);
+  FSetMain.CalibracaoStr := Trim(edCalibracao.Text);
+  FSetMain.PesoCalStr := Trim(edPesoCal.Text);
+  FSetMain.MediaStr := Trim(edMedia.Text);
+  FSetMain.SalvaContexto(False);
+end;
+
+function Tfrmmain.ExigeLeituras: Boolean;
+begin
+  Result := FJanelaBruto.Count >= 3;
+  if not Result then
+    ShowMessage('Sem leituras do equipamento. Conecte o dinamômetro ' +
+      'e aguarde alguns segundos antes de fazer a tara ou a calibração.');
 end;
 
 procedure Tfrmmain.indLed1Click(Sender: TObject);
 begin
-  LazSerial1.Device := edPorta.Text;
-
   if LazSerial1.Active then
   begin
     LazSerial1.Close;
     LimpaBufferSerial;
-  end
-  else
-  begin
-    LazSerial1.Open;
-    LimpaBufferSerial;
-    CriaLinha;
+    MostraStatus('Desconectado', False);
+    Exit;
   end;
+
+  LazSerial1.Device := Trim(edPorta.Text);
+  LimpaBufferSerial;
+  try
+    LazSerial1.Open;
+  except
+    on E: Exception do
+    begin
+      MostraStatus('Falha ao abrir ' + LazSerial1.Device + ': ' + E.Message, True);
+      Exit;
+    end;
+  end;
+
+  if not LazSerial1.Active then
+  begin
+    MostraStatus('Não foi possível abrir ' + LazSerial1.Device, True);
+    Exit;
+  end;
+
+  FJanelaBruto.Limpa;
+  CriaLinha;
+  ReiniciaMedicao;
+  MostraStatus('Conectado em ' + LazSerial1.Device, False);
+  if FFator = 0 then
+    MostraStatus('Conectado - equipamento ainda NÃO calibrado', True);
+
+  // Garante que o firmware 2.0 esteja enviando (1.x ignora)
+  LazSerial1.WriteData('START'#10);
 end;
 
 procedure Tfrmmain.btTaraClick(Sender: TObject);
 begin
-  ResetPeso();
-  edTara.Text := IntToStr(referencia);
+  if not ExigeLeituras then Exit;
+
+  FTara := FJanelaBruto.Media;
+  EscreveParametrosNosEdits;
+  FSuavizacao.Limpa;
+  FPicoN := 0;
+  FPrecisaTara := False;
+  lbPico.Caption := 'Pico: ' + FormatFloat('0.00', 0) + ' N';
+  MostraStatus(Format('Tara feita com a média de %d leituras', [FJanelaBruto.Count]), False);
 end;
 
 procedure Tfrmmain.btCalibraClick(Sender: TObject);
 var
-  fator: longint;
+  diferenca: Double;
 begin
-  if StrToIntDef(edPesoCal.Text, 0) = 0 then Exit;
+  LeParametrosDosEdits;
 
-  fator := Trunc((referencia - StrToIntDef(edTara.Text, 0)) / StrToIntDef(edPesoCal.Text, 1));
-  edCalibracao.Text := IntToStr(fator);
+  if FPesoCal <= 0 then
+  begin
+    ShowMessage('Informe o peso de calibração (em gramas) na aba Configuração.');
+    Exit;
+  end;
+  if not ExigeLeituras then Exit;
+
+  diferenca := FJanelaBruto.Media - FTara;
+  if Abs(diferenca) < 10 then
+  begin
+    ShowMessage('A leitura está praticamente igual à tara. Faça a tara sem ' +
+      'carga, pendure o peso de calibração e clique em Calibra de novo.');
+    Exit;
+  end;
+
+  FFator := diferenca / FPesoCal;
+  EscreveParametrosNosEdits;
+  FSuavizacao.Limpa;
+  MostraStatus(Format('Calibrado: %.4f contagens/g (peso %.0f g)', [FFator, FPesoCal]), False);
+  ShowMessage(Format('Calibração concluída.' + LineEnding +
+    'Fator: %.4f contagens por grama.' + LineEnding +
+    'Clique em Salvar na aba Configuração para guardar.', [FFator]));
 end;
 
 procedure Tfrmmain.btsalvarClick(Sender: TObject);
 begin
-  if Assigned(FSetMain) then
-  begin
-    FSetMain.Comport := edPorta.Text;
-
-    // GRAVA EXATAMENTE o que está nos edits (STRING)
-    FSetMain.TaraStr := Trim(edTara.Text);
-    FSetMain.CalibracaoStr := Trim(edCalibracao.Text);
-    FSetMain.PesoCalStr := Trim(edPesoCal.Text); // <-- NOVO
-
-    FSetMain.SalvaContexto(False);
-
-  end;
+  LeParametrosDosEdits;
+  SalvaConfiguracao;
+  MostraStatus('Configuração salva', False);
 end;
 
 procedure Tfrmmain.edCalibracaoChange(Sender: TObject);
 begin
-  // (vazio)
+  // Tara, fator, peso de calibração e média digitados à mão
+  if FAtualizandoEdits then Exit;
+  if Assigned(FSuavizacao) then
+    LeParametrosDosEdits;
 end;
 
 procedure Tfrmmain.edPortaChange(Sender: TObject);
@@ -217,55 +350,63 @@ begin
   // (vazio)
 end;
 
+procedure Tfrmmain.edPortaDropDown(Sender: TObject);
+begin
+  AtualizaListaPortas;
+end;
+
 procedure Tfrmmain.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-  if(LazSerial1.Active)   then
-  begin
-    LazSerial1.close;
-  end;
+  if LazSerial1.Active then
+    LazSerial1.Close;
 end;
 
 procedure Tfrmmain.FormCreate(Sender: TObject);
 begin
   FSerialBuffer := '';
-  lbversao.Caption:= versao;
+  lbversao.Caption := Versao;
+
+  FJanelaBruto := TJanelaMedia.Create(AMOSTRAS_TARA);
+  FSuavizacao := TJanelaMedia.Create(1);
 
   FSetMain := TSetMain.Create;
-  FSetMain.CarregaContexto;
 
-  edPorta.Text := FSetMain.Comport;
+  FAtualizandoEdits := True;
+  try
+    edPorta.Text := FSetMain.Comport;
+    edTara.Text := FSetMain.TaraStr;
+    edCalibracao.Text := FSetMain.CalibracaoStr;
+    edPesoCal.Text := FSetMain.PesoCalStr;
+    edMedia.Text := FSetMain.MediaStr;
+  finally
+    FAtualizandoEdits := False;
+  end;
+  LeParametrosDosEdits;
 
-  // LÊ COMO STRING (CFG)
-  edTara.Text := FSetMain.TaraStr;
-  edCalibracao.Text := FSetMain.CalibracaoStr;
-  edPesoCal.Text := FSetMain.PesoCalStr; // <-- NOVO
+  AtualizaListaPortas;
+  CriaLinha;
+  ReiniciaMedicao;
+
+  FPrecisaTara := FSetMain.TaraDescartada;
+  if FPrecisaTara then
+    MostraStatus('Configuração da versão anterior: faça a tara de novo', True)
+  else
+    MostraStatus('Desconectado', False);
 end;
 
 procedure Tfrmmain.FormDestroy(Sender: TObject);
 begin
-  // garante que o valor atual digitado no Edit seja gravado
-  try
-    ActiveControl := nil;
-  except
-  end;
-  Application.ProcessMessages;
-
-  if Assigned(FSetMain) then
-  begin
-    FSetMain.Comport := edPorta.Text;
-
-    // GRAVA EXATAMENTE o que está nos edits (STRING)
-    FSetMain.TaraStr := Trim(edTara.Text);
-    FSetMain.CalibracaoStr := Trim(edCalibracao.Text);
-    FSetMain.PesoCalStr := Trim(edPesoCal.Text); // <-- NOVO
-
-    FSetMain.SalvaContexto(False);
-    FreeAndNil(FSetMain);
-  end;
-
   if LazSerial1.Active then
     LazSerial1.Close;
 
+  if Assigned(FSetMain) then
+  begin
+    SalvaConfiguracao;
+    FreeAndNil(FSetMain);
+  end;
+
+  FreeAndNil(FJanelaBruto);
+  FreeAndNil(FSuavizacao);
   LimpaBufferSerial;
 end;
 
@@ -274,71 +415,117 @@ begin
   PageControl1.ActivePage := tsSobre;
 end;
 
-procedure Tfrmmain.LazSerial1RxData(Sender: TObject);
+procedure Tfrmmain.ProcessaAmostra(ATempoS: Double; ABruto: Int64);
 var
-  s, linha, numStr: string;
-  p, posPeso: Integer;
-  vPesoLido: Integer;
+  gramas, forcaN: Double;
+begin
+  FJanelaBruto.Adiciona(ABruto);
+
+  gramas := BrutoParaGramas(ABruto, FTara, FFator);
+  FSuavizacao.Adiciona(gramas);
+  forcaN := GramasParaNewtons(FSuavizacao.Media);
+  FUltimaForcaN := forcaN;
+
+  if Abs(forcaN) > Abs(FPicoN) then
+    FPicoN := forcaN;
+
+  if FNumDados >= Length(FDados) then
+    SetLength(FDados, Length(FDados) * 2 + 1024);
+  FDados[FNumDados].TempoS := ATempoS;
+  FDados[FNumDados].Bruto := ABruto;
+  FDados[FNumDados].ForcaN := forcaN;
+  Inc(FNumDados);
+
+  if Assigned(LineSeries) then
+    LineSeries.AddXY(ATempoS, forcaN);
+end;
+
+procedure Tfrmmain.AtualizaMostradores;
+var
   kgf: Double;
 begin
-  if not LazSerial1.DataAvailable then
-    Exit;
+  kgf := FUltimaForcaN / G_PADRAO;
 
+  LedForca.Caption := FormatFloat('0.00', FUltimaForcaN);   // N
+  ledPeso.Caption := FormatFloat('0.000', kgf);             // kgf
+
+  indGnouMeter1.Value := FUltimaForcaN;
+  A3nalogGauge1.Position := kgf * 1000;                     // gf
+
+  lbPico.Caption := 'Pico: ' + FormatFloat('0.00', FPicoN) + ' N';
+end;
+
+procedure Tfrmmain.LazSerial1RxData(Sender: TObject);
+var
+  s, linha: string;
+  d: TLinhaDecodificada;
+  tempoS: Double;
+  houveAmostra: Boolean;
+  tick: QWord;
+begin
   s := LazSerial1.ReadData;
-  if s = '' then
-    Exit;
+  if s = '' then Exit;
 
   FSerialBuffer := FSerialBuffer + s;
+  houveAmostra := False;
 
-  // só processa quando tiver LF (#10)
-  p := Pos(#10, FSerialBuffer);
-  if p = 0 then
-    Exit;
+  Chart1.DisableRedrawing;
+  try
+    // Processa TODAS as linhas completas que chegaram, não só a primeira
+    while ExtraiLinha(FSerialBuffer, linha) do
+    begin
+      d := DecodificaLinha(linha);
+      case d.Tipo of
+        tlAmostra:
+          begin
+            if FT0Ms < 0 then
+              FT0Ms := d.TempoMs
+            else if d.TempoMs < FUltimoMs then
+              // ESP32 reiniciou: continua a contagem de onde parou
+              FT0Ms := d.TempoMs - Round(FUltimoTempoS * 1000);
+            FUltimoMs := d.TempoMs;
+            tempoS := (d.TempoMs - FT0Ms) / 1000.0;
+            FUltimoTempoS := tempoS;
+            ProcessaAmostra(tempoS, d.Bruto);
+            houveAmostra := True;
+          end;
 
-  linha := Copy(FSerialBuffer, 1, p - 1);
+        tlAmostraLegada:
+          begin
+            tick := GetTickCount64;
+            if FT0Tick = 0 then FT0Tick := tick;
+            tempoS := (tick - FT0Tick) / 1000.0;
+            FUltimoTempoS := tempoS;
+            ProcessaAmostra(tempoS, d.Bruto);
+            houveAmostra := True;
+          end;
 
-  // remove CR se vier CRLF
-  if (linha <> '') and (linha[Length(linha)] = #13) then
-    Delete(linha, Length(linha), 1);
+        tlErro:
+          if d.Texto = 'SAT' then
+            MostraStatus('Célula de carga saturada ou desconectada', True)
+          else if d.Texto = 'NOHX711' then
+            MostraStatus('HX711 não responde - verifique a ligação', True)
+          else
+            MostraStatus('Erro do equipamento: ' + d.Texto, True);
+      end;
+    end;
+  finally
+    Chart1.EnableRedrawing;
+  end;
 
-  // remove do buffer até o LF (inclusive)
-  Delete(FSerialBuffer, 1, p);
-
-  linha := Trim(linha);
-  if linha = '' then
-    Exit;
-
-  posPeso := Pos('Peso:', linha);
-  if posPeso <= 0 then
-    Exit;
-
-  numStr := Trim(Copy(linha, posPeso + 5, MaxInt));
-  if numStr = '' then
-    Exit;
-
-  if not TryStrToInt(numStr, vPesoLido) then
-    Exit;
-
-  referencia := vPesoLido;
-
-  if StrToIntDef(edCalibracao.Text, 0) <> 0 then
-    peso := Trunc((referencia - StrToIntDef(edTara.Text, 0)) / StrToIntDef(edCalibracao.Text, 1))
-  else
-    peso := (referencia - StrToIntDef(edTara.Text, 0));
-
-  // ======= EXIBIÇÃO =======
-  kgf := GramasParaKgf(peso);
-
-  LedForca.Caption := FormatFloat('0.###', kgf); // kgf
-  ledPeso.Caption := IntToStr(peso div 1000);   // kg (inteiro)
-
-  indGnouMeter1.Value := peso;
-  A3nalogGauge1.Position := peso;
-
-  // ======= GRÁFICO: Y em kgf, X em leitura =======
-  GeraLinhaKgf(kgf);
-
-  Application.ProcessMessages;
+  // Atualiza os mostradores uma vez por lote, não a cada linha
+  if houveAmostra then
+  begin
+    AtualizaMostradores;
+    // Um aviso de erro some quando as leituras voltam, mas os avisos de
+    // tara/calibração pendentes continuam até serem resolvidos.
+    if FPrecisaTara then
+      MostraStatus('Faça a tara (sem carga) antes de medir', True)
+    else if FFator = 0 then
+      MostraStatus('Equipamento ainda NÃO calibrado', True)
+    else if lbStatus.Font.Color = clRed then
+      MostraStatus('Recebendo leituras', False);
+  end;
 end;
 
 procedure Tfrmmain.LazSerial1Status(Sender: TObject; Reason: THookSerialReason;
@@ -356,13 +543,64 @@ end;
 
 procedure Tfrmmain.milimparClick(Sender: TObject);
 begin
-  if Assigned(LineSeries) then
-    LineSeries.Clear;
+  ReiniciaMedicao;
+end;
+
+procedure Tfrmmain.ExportaCSV(const AArquivo: string);
+var
+  sl: TStringList;
+  fmt: TFormatSettings;
+  i: Integer;
+begin
+  // Formato brasileiro: ponto e vírgula entre colunas, vírgula decimal
+  // (abre direto no Excel e no LibreOffice em português).
+  fmt := DefaultFormatSettings;
+  fmt.DecimalSeparator := ',';
+  fmt.ThousandSeparator := #0;
+
+  sl := TStringList.Create;
+  try
+    sl.Add('tempo_s;bruto;forca_N;forca_kgf');
+    for i := 0 to FNumDados - 1 do
+      sl.Add(FloatToStrF(FDados[i].TempoS, ffFixed, 12, 3, fmt) + ';' +
+             IntToStr(FDados[i].Bruto) + ';' +
+             FloatToStrF(FDados[i].ForcaN, ffFixed, 12, 4, fmt) + ';' +
+             FloatToStrF(FDados[i].ForcaN / G_PADRAO, ffFixed, 12, 5, fmt));
+    sl.SaveToFile(AArquivo);
+  finally
+    sl.Free;
+  end;
 end;
 
 procedure Tfrmmain.misalvarClick(Sender: TObject);
+var
+  dlg: TSaveDialog;
 begin
-  // (vazio)
+  if FNumDados = 0 then
+  begin
+    ShowMessage('Não há leituras para exportar.');
+    Exit;
+  end;
+
+  dlg := TSaveDialog.Create(Self);
+  try
+    dlg.Title := 'Exportar leituras';
+    dlg.Filter := 'Planilha CSV (*.csv)|*.csv';
+    dlg.DefaultExt := 'csv';
+    dlg.FileName := 'dinamometro_' + FormatDateTime('yyyymmdd_hhnnss', Now) + '.csv';
+    dlg.Options := dlg.Options + [ofOverwritePrompt];
+    if not dlg.Execute then Exit;
+
+    try
+      ExportaCSV(dlg.FileName);
+      MostraStatus(Format('%d leituras exportadas', [FNumDados]), False);
+    except
+      on E: Exception do
+        ShowMessage('Não foi possível salvar o arquivo: ' + E.Message);
+    end;
+  finally
+    dlg.Free;
+  end;
 end;
 
 end.

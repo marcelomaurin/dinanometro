@@ -38,6 +38,32 @@ email: marcelomaurinmartins@gmail.com
 
 - LOADCELL_DOUT_PIN = 18
 - LOADCELL_SCK_PIN = 19
+- Pino RATE do HX711: em GND = 10 leituras/s; em VCC = 80 leituras/s (recomendado para curvas de força x tempo)
+
+## Firmware 2.0
+- Pasta: /firmware/leitor
+- Biblioteca: "HX711" de Rob Tillaart (Gerenciador de Bibliotecas da IDE Arduino)
+- Placa: ESP32 Dev Module (testado com o core ESP32 2.0.17)
+
+O firmware envia a leitura **bruta** do HX711, com o tempo do ESP32, pela serial USB e pelo Bluetooth ("PESO"). A tara e a calibração ficam no software do PC, então o fator de calibração continua valendo depois de desligar o equipamento.
+
+Protocolo (uma mensagem por linha, 115200 bps na USB):
+- `D,<ms>,<bruto>` amostra: tempo desde o boot (ms) e contagens do ADC
+- `E,<ms>,SAT` célula saturada ou desconectada; `E,<ms>,NOHX711` HX711 sem responder
+- `# texto` mensagem informativa
+
+Comandos aceitos (USB ou Bluetooth): `INFO`, `STATUS`, `START`, `STOP`, `PING`.
+
+## Calibração (software 2.0)
+1. Conecte o equipamento (aba Informação, botão Acionamento).
+2. Sem carga, clique em **Tara**.
+3. Na aba Configuração, informe o **peso de calibração em gramas**.
+4. Pendure o peso de referência e clique em **Calibra**.
+5. Clique em **Salvar**.
+
+A força é mostrada em newtons (N) e em kgf, com o valor de pico. No gráfico (Força x Tempo), o botão direito do mouse permite **Limpar** e **Exportar CSV** (separador `;` e vírgula decimal, pronto para Excel/LibreOffice).
+
+Ao atualizar da versão 1.x, refaça a tara: a tara antiga era relativa ao firmware 1.x.
 
 ## HX711 Conexoes
 <img src="https://github.com/marcelomaurin/dinanometro/blob/main/img/ligcelula.JPG">
@@ -124,6 +150,10 @@ Email: marcelomaurinmartins@gmail.com
 ## PinOut
 - LOADCELL_DOUT_PIN = 18
 - LOADCELL_SCK_PIN = 19
+- HX711 RATE pin: GND = 10 samples/s; VCC = 80 samples/s
+
+## Firmware 2.0
+The firmware streams raw HX711 counts with the ESP32 timestamp (`D,<ms>,<raw>`) over USB and Bluetooth; tare and calibration are done in the PC software. Requires the "HX711" library by Rob Tillaart. See the Portuguese section for the protocol, commands and calibration steps.
 
 ## Operation
 The Set consists of:

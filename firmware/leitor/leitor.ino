@@ -1,181 +1,243 @@
-  
-#include "BluetoothSerial.h"
-// Calibrating the load cell
+/*
+  Dinamometro Digital - firmware do leitor (ESP32 + HX711)
+  Autor: Marcelo Maurin Martins - marcelomaurinmartins@gmail.com
+  FATEC Ribeirao Preto - Sistemas Biomedicos
+
+  Versao 2.0
+  - Envia a leitura BRUTA do HX711 (contagens do ADC). Tara e calibracao
+    ficam no software do PC, num lugar so: o zero nao se perde mais quando
+    o ESP32 reinicia, e o fator de calibracao salvo no PC continua valendo.
+  - Leitura nao bloqueante: cada amostra do HX711 e enviada assim que fica
+    pronta (10 SPS com o pino RATE do HX711 em GND, 80 SPS com RATE em VCC).
+  - Cada amostra leva o tempo do ESP32 em milissegundos, para o grafico
+    Forca x Tempo nao depender do atraso do Bluetooth.
+  - Mesma saida na serial USB e no Bluetooth.
+  - Comandos de texto (USB ou Bluetooth), um por linha:
+      INFO    versao e identificacao
+      STATUS  taxa de amostragem medida, ultima leitura, Bluetooth
+      START   liga o envio de amostras (padrao)
+      STOP    desliga o envio de amostras
+      PING    responde PONG
+
+  Protocolo de saida (uma linha por mensagem, terminada em \n):
+      D,<ms>,<bruto>     amostra: tempo desde o boot (ms) e contagens do ADC
+      E,<ms>,<codigo>    erro: SAT (ADC saturado / celula desconectada),
+                         NOHX711 (HX711 sem responder)
+      # texto            mensagem informativa (o PC ignora)
+
+  Biblioteca: "HX711" de Rob Tillaart (Gerenciador de Bibliotecas do Arduino).
+*/
+
 #include <Arduino.h>
-#include "soc/rtc.h"
+#include "BluetoothSerial.h"
 #include "HX711.h"
 
-// HX711 circuit wiring
-const int LOADCELL_DOUT_PIN = 18;
-const int LOADCELL_SCK_PIN = 19;
+#define FW_VERSION  "2.0"
+#define BT_NAME     "PESO"
 
-//#define CALIBRATION_FACTOR -471.497
-//#define CALIBRATION_FACTOR 420.0983
-#define CALIBRATION_FACTOR -7050
+// Ligacoes do HX711
+const uint8_t LOADCELL_DOUT_PIN = 18;
+const uint8_t LOADCELL_SCK_PIN  = 19;
 
-float scaleFactor = 10000.0; // Valor obtido na calibração com 1 Newton
+// Limites do ADC de 24 bits do HX711: valores fixos nesses extremos indicam
+// celula saturada, fio solto ou celula desconectada.
+const long ADC_MAX = 8388607L;
+const long ADC_MIN = -8388608L;
+
+// Sem amostra por esse tempo = HX711 nao responde
+const uint32_t HX711_TIMEOUT_MS = 1000;
 
 HX711 scale;
-
-  
 BluetoothSerial SerialBT;
-int flgconected = 0; //Testa se tem alguem
 
-int reading;
-int lastReading;
-int refzero = 0;
-uint32_t start, stop;
-volatile float f;
+volatile bool btConectado = false;
+bool enviando = true;
 
+long     ultimaLeitura   = 0;
+uint32_t ultimaAmostraMs = 0;
+uint32_t ultimoErroMs    = 0;
 
-//Funcoes
-void displayWeight(int weight);
+// Medida da taxa de amostragem real
+uint32_t contAmostras    = 0;
+uint32_t janelaInicioMs  = 0;
+float    taxaSps         = 0.0f;
 
-//Função CallBack
-void callback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param){
-  if(event == ESP_SPP_SRV_OPEN_EVT)
-  {
-    Serial.println("Client Connected");
-    flgconected = 1;
-  }  
-  if(event == ESP_SPP_CLOSE_EVT ){
-    Serial.println("Client disconnected");
-    flgconected = 0;
+// Buffers de comando (um por canal, tamanho limitado)
+const size_t CMD_MAX = 32;
+char   cmdUsb[CMD_MAX];
+size_t cmdUsbLen = 0;
+char   cmdBt[CMD_MAX];
+size_t cmdBtLen = 0;
+
+// ---------------------------------------------------------------------------
+// Saida: tudo que o PC precisa ver vai para os dois canais
+// ---------------------------------------------------------------------------
+void enviaLinha(const char *linha)
+{
+  Serial.println(linha);
+  if (btConectado) {
+    SerialBT.println(linha);
   }
 }
 
-void Wellcome()
+void enviaInfo(const char *texto)
 {
-  Serial.println("Dinanometro Version 1.1");
-  Serial.println("Create Marcelo Maurin Martins");
-  Serial.println("Email: marcelomaurinmartins@gmail.com");
+  char buf[96];
+  snprintf(buf, sizeof(buf), "# %s", texto);
+  enviaLinha(buf);
 }
 
-
-void Inicializa()
+void enviaErro(uint32_t ms, const char *codigo)
 {
-
-  flgconected = 0;
-
-  Serial.println("\nPERFORMANCE");
-  start = micros();
-  f = 0;
-  for (int i = 0; i < 100; i++)
-  {
-    reading = scale.read_medavg(7);
-  }
-  refzero = reading;
-  stop = micros();
-  Serial.print("100x read_medavg(7) = ");
-  Serial.println(stop - start);
-  Serial.print("  VAL: ");
-  Serial.println(reading, 2);
+  char buf[48];
+  snprintf(buf, sizeof(buf), "E,%lu,%s", (unsigned long)ms, codigo);
+  enviaLinha(buf);
 }
 
-
-void Start_LC()
+// ---------------------------------------------------------------------------
+// Bluetooth
+// ---------------------------------------------------------------------------
+void btCallback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
 {
-  rtc_cpu_freq_config_t config;
-  rtc_clk_cpu_freq_get_config(&config);
-  rtc_clk_cpu_freq_to_config(RTC_CPU_FREQ_80M, &config);
-  rtc_clk_cpu_freq_set_config_fast(&config);
-  Serial.println("Initializing the scale");
-  scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
-
-  scale.set_scale(CALIBRATION_FACTOR);   // this value is obtained by calibrating the scale with known weights; see the README for details
-  scale.tare();               // reset the scale to 0
-}
-void Start_Serial()
-{
-  Serial.begin(115200); 
-}
-
-void Start_BTSerial()
-{   
-  //Registrando o Callback da funcao
-  SerialBT.register_callback(callback);
- 
-  if(!SerialBT.begin("PESO"))
-  {
-     Serial.println("An error occurred initializing Bluetooth");
-  }else
-  {
-    Serial.println("Bluetooth initialized");
+  if (event == ESP_SPP_SRV_OPEN_EVT) {
+    btConectado = true;
+  } else if (event == ESP_SPP_CLOSE_EVT) {
+    btConectado = false;
   }
 }
 
-void setup() {
-  Start_Serial(); 
-  Wellcome();
-   Start_LC();
-  // put your setup code here, to run once:
-  Start_BTSerial();
-  Tara();  
-  Serial.println("Initialize finished!");
+void iniciaBluetooth()
+{
+  SerialBT.register_callback(btCallback);
+  if (SerialBT.begin(BT_NAME)) {
+    Serial.println("# Bluetooth iniciado como " BT_NAME);
+  } else {
+    Serial.println("# ERRO ao iniciar o Bluetooth");
+  }
 }
 
-void Tara()
+// ---------------------------------------------------------------------------
+// Comandos
+// ---------------------------------------------------------------------------
+void cmdInfo()
 {
-  if (scale.is_ready()) 
-  {
-    scale.set_scale();    
-    Serial.println("Tare... remove any weights from the scale.");
-    delay(5000);
-    scale.tare();
-    Serial.println("Tare done...");
-    Serial.print("Place a known weight on the scale...");
-    delay(5000);
-    //reading = scale.get_units(10);
-    reading = scale.read_medavg(7);  
-    refzero = reading;
-    Serial.print("Tara: ");
-    Serial.println(reading);
-  } 
+  enviaInfo("Dinamometro Digital firmware " FW_VERSION);
+  enviaInfo("Marcelo Maurin Martins - marcelomaurinmartins@gmail.com");
+  enviaInfo("Protocolo: D,<ms>,<bruto> | E,<ms>,<codigo>");
+}
+
+void cmdStatus()
+{
+  char buf[96];
+  snprintf(buf, sizeof(buf), "STATUS taxa=%.1f SPS, ultima=%ld, envio=%s, bt=%s",
+           taxaSps, ultimaLeitura, enviando ? "ON" : "OFF",
+           btConectado ? "conectado" : "livre");
+  enviaInfo(buf);
+}
+
+void executaComando(char *cmd)
+{
+  // Normaliza: remove espacos nas pontas e passa para maiusculas
+  while (*cmd == ' ') cmd++;
+  size_t n = strlen(cmd);
+  while (n > 0 && (cmd[n - 1] == ' ' || cmd[n - 1] == '\r')) cmd[--n] = '\0';
+  for (size_t i = 0; i < n; i++) cmd[i] = toupper((unsigned char)cmd[i]);
+  if (n == 0) return;
+
+  if      (strcmp(cmd, "INFO") == 0)   cmdInfo();
+  else if (strcmp(cmd, "STATUS") == 0) cmdStatus();
+  else if (strcmp(cmd, "START") == 0)  { enviando = true;  enviaInfo("envio ligado"); }
+  else if (strcmp(cmd, "STOP") == 0)   { enviando = false; enviaInfo("envio desligado"); }
+  else if (strcmp(cmd, "PING") == 0)   enviaInfo("PONG");
   else {
-    Serial.println("HX711 not found.");
+    char buf[64];
+    snprintf(buf, sizeof(buf), "comando desconhecido: %s", cmd);
+    enviaInfo(buf);
   }
 }
 
-void displayWeight(int weight){
-    
-  // Display static text
-  SerialBT.print("Peso:");
-  SerialBT.println(weight);
-  Serial.print("Peso: ");
-  Serial.println(reading);  
-}
-
-void LerLC()
+// Acumula bytes ate o fim de linha. Linhas longas demais sao descartadas.
+void leCanal(Stream &canal, char *buf, size_t &len)
 {
-  if (scale.wait_ready_timeout(200)) 
-  {
-    //reading = round(scale.get_units());
-    // continuous scale once per second
-    reading = scale.read_medavg(7);  
-
-    if (reading != lastReading)
-    {
-      displayWeight(reading-refzero ); 
+  while (canal.available()) {
+    char c = (char)canal.read();
+    if (c == '\n') {
+      buf[len] = '\0';
+      executaComando(buf);
+      len = 0;
+    } else if (len < CMD_MAX - 1) {
+      buf[len++] = c;
+    } else {
+      len = 0;  // estourou: descarta a linha
     }
   }
 }
 
-void LerBT()
+// ---------------------------------------------------------------------------
+// Leitura do HX711 (nao bloqueante)
+// ---------------------------------------------------------------------------
+void leCelula()
 {
-  while(SerialBT.available())
-  {
-    Serial.write(SerialBT.read());
+  uint32_t agora = millis();
+
+  if (!scale.is_ready()) {
+    if (agora - ultimaAmostraMs > HX711_TIMEOUT_MS && agora - ultimoErroMs > 2000) {
+      enviaErro(agora, "NOHX711");
+      ultimoErroMs = agora;
+    }
+    return;
   }
+
+  long bruto = (long)scale.read();
+  ultimaLeitura   = bruto;
+  ultimaAmostraMs = agora;
+
+  // Taxa de amostragem medida a cada segundo
+  contAmostras++;
+  if (agora - janelaInicioMs >= 1000) {
+    taxaSps = contAmostras * 1000.0f / (agora - janelaInicioMs);
+    contAmostras = 0;
+    janelaInicioMs = agora;
+  }
+
+  if (!enviando) return;
+
+  if (bruto >= ADC_MAX || bruto <= ADC_MIN) {
+    if (agora - ultimoErroMs > 2000) {
+      enviaErro(agora, "SAT");
+      ultimoErroMs = agora;
+    }
+    return;
+  }
+
+  char buf[40];
+  snprintf(buf, sizeof(buf), "D,%lu,%ld", (unsigned long)agora, bruto);
+  enviaLinha(buf);
 }
 
-void Leituras()
+// ---------------------------------------------------------------------------
+void setup()
 {
-  LerBT();
-  LerLC();
+  Serial.begin(115200);
+  delay(200);
+
+  cmdInfo();
+
+  // fastProcessor = true: pulsos de clock mais longos para o ESP32 a 240 MHz,
+  // dispensando baixar o clock da CPU (que atrapalhava o Bluetooth).
+  scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN, true);
+
+  iniciaBluetooth();
+
+  janelaInicioMs  = millis();
+  ultimaAmostraMs = millis();
+  enviaInfo("pronto");
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
-  Leituras();
-  delay(500);
+void loop()
+{
+  leCanal(Serial, cmdUsb, cmdUsbLen);
+  leCanal(SerialBT, cmdBt, cmdBtLen);
+  leCelula();
+  delay(1);  // cede tempo ao Wi-Fi/Bluetooth; nao limita a taxa do HX711
 }

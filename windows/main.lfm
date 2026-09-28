@@ -3698,14 +3698,16 @@ object frmmain: Tfrmmain
         Caption = 'Porta:'
         ParentColor = False
       end
-      object edPorta: TEdit
+      object edPorta: TComboBox
         Left = 40
         Height = 23
         Top = 70
         Width = 189
+        ItemHeight = 15
         TabOrder = 0
         Text = 'COM5'
         OnChange = edPortaChange
+        OnDropDown = edPortaDropDown
       end
       object edTara: TEdit
         Left = 40
@@ -3714,13 +3716,14 @@ object frmmain: Tfrmmain
         Width = 189
         TabOrder = 1
         Text = '24594'
+        OnChange = edCalibracaoChange
       end
       object Label3: TLabel
         Left = 40
         Height = 15
         Top = 102
         Width = 26
-        Caption = 'Tara:'
+        Caption = 'Tara (contagens):'
         ParentColor = False
       end
       object Label4: TLabel
@@ -3728,7 +3731,7 @@ object frmmain: Tfrmmain
         Height = 15
         Top = 154
         Width = 89
-        Caption = 'Valor Calibração:'
+        Caption = 'Fator de calibração (contagens/g):'
         ParentColor = False
       end
       object edCalibracao: TEdit
@@ -3745,7 +3748,7 @@ object frmmain: Tfrmmain
         Height = 15
         Top = 205
         Width = 103
-        Caption = 'Peso de Calibração:'
+        Caption = 'Peso de calibração (g):'
         ParentColor = False
       end
       object edPesoCal: TEdit
@@ -3763,18 +3766,41 @@ object frmmain: Tfrmmain
         Top = 19
         Width = 403
         Lines.Strings = (
-          'O sistema funciona acessando a porta serial criada pelo bluetooth.'
+          'O sistema acessa a porta serial criada pelo Bluetooth (ou o cabo USB).'
           ''
-          'Porta - Porta Serial Criada pelo dispositivo pareado.'
-          'Tara - Valor calculado de Tara '
-          'Valor de Calibração - Valor calculado de Calibração'
-          'Peso de Calibração - Valor do Peso de Referencia para Calibração'
+          'Porta - porta serial do dispositivo pareado (clique na seta para listar).'
+          'Tara - leitura do ADC sem carga (botão Tara, aba Informação).'
+          'Fator de calibração - contagens do ADC por grama (botão Calibra).'
+          'Peso de calibração - massa de referência, em gramas.'
+          'Média móvel - quantas leituras são somadas para suavizar a força (1 = sem suavização).'
           ''
+          'Calibração: sem carga clique em Tara; pendure o peso de referência'
+          'e clique em Calibra; depois clique em Salvar.'
           ''
-          'A tara, e a calibração é feita por software e não por firmware.'
+          'A tara e a calibração são feitas pelo software, não pelo firmware.'
+          'O fator de calibração continua valendo depois de desligar o equipamento.'
+          ''
+          'No gráfico, clique com o botão direito para limpar ou exportar CSV.'
         )
         ReadOnly = True
         TabOrder = 4
+      end
+      object Label13: TLabel
+        Left = 140
+        Height = 15
+        Top = 257
+        Width = 76
+        Caption = 'Média móvel:'
+        ParentColor = False
+      end
+      object edMedia: TEdit
+        Left = 140
+        Height = 23
+        Top = 276
+        Width = 89
+        TabOrder = 6
+        Text = '1'
+        OnChange = edCalibracaoChange
       end
       object btsalvar: TButton
         Left = 44
@@ -3802,11 +3828,11 @@ object frmmain: Tfrmmain
         Height = 301
         Top = 19
         Width = 100
-        Caption = 'Força Kgf'
-        SignalUnit = 'Units'
-        ValueMax = 10000
-        Digits = 0
-        Increment = 10
+        Caption = 'Força (N)'
+        SignalUnit = 'N'
+        ValueMax = 50
+        Digits = 1
+        Increment = 5
         MarkerColor = clBlue
       end
       object A3nalogGauge1: TA3nalogGauge
@@ -3815,9 +3841,9 @@ object frmmain: Tfrmmain
         Top = 26
         Width = 184
         Angle = 90
-        Caption = 'Força  gf'
-        Scale = 1000000
-        ScaleMax = 1000000
+        Caption = 'Força (gf)'
+        Scale = 5000
+        ScaleMax = 5000
         Style = agsLeftStyle
       end
       object indLed1: TindLed
@@ -3854,7 +3880,7 @@ object frmmain: Tfrmmain
         Height = 15
         Top = 32
         Width = 60
-        Caption = 'Força (kgf):'
+        Caption = 'Força (N):'
         ParentColor = False
       end
       object btTara: TButton
@@ -3888,7 +3914,7 @@ object frmmain: Tfrmmain
         Height = 15
         Top = 90
         Width = 52
-        Caption = 'Peso (kg):'
+        Caption = 'Força (kgf):'
         ParentColor = False
       end
       object ledPeso: TLEDNumber
@@ -3897,6 +3923,27 @@ object frmmain: Tfrmmain
         Top = 109
         Width = 170
         Caption = '0'
+      end
+      object lbPico: TLabel
+        Left = 187
+        Height = 20
+        Top = 160
+        Width = 90
+        Caption = 'Pico: 0,00 N'
+        Font.Height = -15
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+      end
+      object lbStatus: TLabel
+        Left = 187
+        Height = 45
+        Top = 200
+        Width = 180
+        AutoSize = False
+        Caption = 'Desconectado'
+        ParentColor = False
+        WordWrap = True
       end
     end
     object TabSheet3: TTabSheet
@@ -3960,6 +4007,10 @@ object frmmain: Tfrmmain
     object milimpar: TMenuItem
       Caption = 'Limpar'
       OnClick = milimparClick
+    end
+    object misalvar: TMenuItem
+      Caption = 'Exportar CSV...'
+      OnClick = misalvarClick
     end
   end
 end

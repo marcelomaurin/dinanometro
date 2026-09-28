@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "dinamometro"
-#define MyAppVersion "1.04"
+#define MyAppVersion "2.0"
 #define MyAppPublisher "Maurinsoft"
 #define MyAppURL "http://maurinsoft.com.br"
 #define MyAppExeName "dinanometro.exe"
@@ -24,7 +24,7 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName={pf}\dinamometro
 DisableProgramGroupPage=yes
 OutputDir=D:\projetos\maurinsoft\dinanometro\bin
-OutputBaseFilename=dinamometro_1.4
+OutputBaseFilename=dinamometro_2.0
 ;SetupIconFile=D:\projetos\maurinsoft\dinanometro\dina.ico
 Compression=lzma
 SolidCompression=yes

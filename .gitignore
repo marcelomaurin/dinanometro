@@ -1,0 +1,16 @@
+# Lazarus / Free Pascal
+windows/lib/
+windows/backup/
+*.lps
+*.compiled
+*.ppu
+*.o
+*.or
+windows/dinanometro
+windows/dinanometro.exe
+
+# Arduino / ESP32
+firmware/**/build/
+
+# Arquivos temporarios do SolidWorks e do Office
+~$*
