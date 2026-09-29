@@ -38,7 +38,7 @@ const int      LOADCELL_SCK_PIN  = 19;
 const char    *BT_NAME           = "PESO";
 const uint32_t SERIAL_BAUD       = 115200;
 
-const uint8_t  MEDIAN_WINDOW     = 5;      // amostras no filtro de mediana (impar)
+const uint8_t  MEDIAN_WINDOW     = 3;      // mediana de 3: remove picos com pouco atraso
 const uint8_t  ZERO_SAMPLES      = 20;     // amostras para medir o zero
 const uint32_t DEFAULT_PERIOD_MS = 100;    // intervalo padrao de envio
 const uint32_t SENSOR_TIMEOUT_MS = 1000;   // sem amostra por esse tempo => sensor ausente

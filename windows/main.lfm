@@ -3802,7 +3802,7 @@ object frmmain: Tfrmmain
         Height = 301
         Top = 19
         Width = 100
-        Caption = 'Força Kgf'
+        Caption = 'Força gf'
         SignalUnit = 'Units'
         ValueMax = 10000
         Digits = 0
@@ -3854,7 +3854,7 @@ object frmmain: Tfrmmain
         Height = 15
         Top = 32
         Width = 60
-        Caption = 'Força (kgf):'
+        Caption = 'Força (N):'
         ParentColor = False
       end
       object btTara: TButton
@@ -3888,7 +3888,7 @@ object frmmain: Tfrmmain
         Height = 15
         Top = 90
         Width = 52
-        Caption = 'Peso (kg):'
+        Caption = 'Massa equivalente (kg):'
         ParentColor = False
       end
       object ledPeso: TLEDNumber

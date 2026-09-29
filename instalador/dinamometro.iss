@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "dinamometro"
-#define MyAppVersion "1.04"
+#define MyAppVersion "1.5"
 #define MyAppPublisher "Maurinsoft"
 #define MyAppURL "http://maurinsoft.com.br"
 #define MyAppExeName "dinanometro.exe"
@@ -23,9 +23,10 @@ AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={pf}\dinamometro
 DisableProgramGroupPage=yes
-OutputDir=D:\projetos\maurinsoft\dinanometro\bin
-OutputBaseFilename=dinamometro_1.4
-;SetupIconFile=D:\projetos\maurinsoft\dinanometro\dina.ico
+; caminhos relativos a esta pasta (instalador\)
+OutputDir=..\bin
+OutputBaseFilename=dinamometro_1.5
+SetupIconFile=..\windows\dinanometro.ico
 Compression=lzma
 SolidCompression=yes
 
@@ -37,7 +38,7 @@ Name: "brazilianportuguese"; MessagesFile: "compiler:Languages\BrazilianPortugue
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "D:\projetos\maurinsoft\dinanometro\windows\dinanometro.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\windows\dinanometro.exe"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

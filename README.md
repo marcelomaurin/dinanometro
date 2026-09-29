@@ -40,10 +40,10 @@ email: marcelomaurinmartins@gmail.com
 - LOADCELL_SCK_PIN = 19
 
 ## HX711 Conexoes
-<img src="https://github.com/marcelomaurin/dinanometro/blob/main/img/ligcelula.JPG">
+<img src="img/ligcelula.JPG">
 
 ## Imagens
-<img src="https://github.com/marcelomaurin/dinanometro/blob/main/img/dinamometro.jpeg">
+<img src="img/dinamometro.jpeg">
 
 ## Funcionamento
 O Conjunto consiste de:
@@ -62,7 +62,7 @@ Suporte de parede para instalação do equipamento de medição
 
 Caixa de fixação do ESP32
 - Arquivo solid: /solid/caixa.sldprt
-- Arquiv /stl/caixa.stl
+- Arquivo: /stl/caixa.stl
 
 ## Software
 Software compatível com Windows.
@@ -70,13 +70,51 @@ Notebook ou PC precisa de Bluetooth para comunicar com equipamento.
 
 ### Screens do Software
 #### Apresentação
-<img src="https://github.com/marcelomaurin/dinanometro/blob/main/img/software01.JPG">
+<img src="img/software01.JPG">
 #### Operação
-<img src="https://github.com/marcelomaurin/dinanometro/blob/main/img/software02.JPG">
+<img src="img/software02.JPG">
 #### Força sobre tempo
-<img src="https://github.com/marcelomaurin/dinanometro/blob/main/img/software03.JPG">
+<img src="img/software03.JPG">
 #### Configurações
-<img src="https://github.com/marcelomaurin/dinanometro/blob/main/img/software04.JPG">
+<img src="img/software04.JPG">
+
+### Como calibrar
+1. Conecte-se ao dinamômetro (clique no LED "Acionamento" na aba Informação).
+2. Deixe o dinamômetro sem carga e clique em **Tara**.
+3. Informe a massa de referência em gramas (aba Configuração → Peso de Calibração).
+4. Pendure a massa de referência e clique em **Calibra**.
+5. Clique em **Salvar** para guardar os valores.
+
+A força é exibida em Newtons: F (N) = massa (kg) × 9,80665 m/s². O gráfico mostra força × tempo;
+clique com o botão direito sobre ele para **Limpar** ou **Exportar CSV** (separador `;`, abre direto no Excel/LibreOffice).
+
+## Firmware (ESP32)
+Código em `firmware/leitor/leitor.ino`. Bibliotecas: **HX711** (Bogdan Necula) e **BluetoothSerial** (core ESP32).
+Placa: *ESP32 Dev Module*. O equipamento aparece no Bluetooth como `PESO`.
+
+Ao ligar, o firmware mede o zero automaticamente — mantenha o dinamômetro **sem carga** nos primeiros segundos.
+
+### Protocolo serial (USB 115200 bps e Bluetooth SPP)
+O mesmo conteúdo sai pela USB e pelo Bluetooth:
+
+| Linha | Significado |
+|-------|-------------|
+| `Peso:<n>` | leitura do sensor (contagens do HX711 menos o zero), a cada 100 ms por padrão |
+| `# ...` | mensagem informativa (o software ignora) |
+
+A conversão para gramas/Newtons é feita no software (tara e calibração).
+
+### Comandos (enviar texto terminado em Enter, pela USB ou Bluetooth)
+| Comando | Ação |
+|---------|------|
+| `ZERO` ou `TARA` | refaz o zero do equipamento (retire a carga antes) |
+| `RATE <ms>` | intervalo de envio, de 20 a 5000 ms |
+| `INFO` | versão, zero atual, estado do sensor e do Bluetooth |
+| `HELP` | lista os comandos |
+
+## Compilando o software
+Lazarus 3.x com os pacotes **TAChartLazarusPkg**, **LazSerialPort** e **industrial** (IndustrialStuff, via Online Package Manager).
+Abra `windows/dinanometro.lpi` e compile. O instalador é gerado com Inno Setup a partir de `instalador/dinamometro.iss`.
 
 ### Requisitos
 Windows 7 ou superior, 4Gb de Ram, 50Mb de Disco livre.

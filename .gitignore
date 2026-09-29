@@ -1,0 +1,15 @@
+# Lazarus / Free Pascal
+*.ppu
+*.o
+*.or
+*.compiled
+*.lps
+*.bak
+windows/lib/
+windows/backup/
+
+# Arduino
+firmware/**/build/
+
+# SolidWorks (arquivos de bloqueio)
+~$*
