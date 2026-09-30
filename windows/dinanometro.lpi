@@ -26,9 +26,6 @@
     </RunParams>
     <RequiredPackages>
       <Item>
-        <PackageName Value="SynEdit"/>
-      </Item>
-      <Item>
         <PackageName Value="TAChartLazarusPkg"/>
       </Item>
       <Item>
@@ -55,10 +52,6 @@
       </Unit>
       <Unit>
         <Filename Value="setmain.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="funcoes.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
     </Units>
