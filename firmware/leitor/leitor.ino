@@ -46,7 +46,7 @@ void callback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param){
 
 void Wellcome()
 {
-  Serial.println("Dinanometro Version 1.1");
+  Serial.println("Dinanometro Version 2.0");
   Serial.println("Create Marcelo Maurin Martins");
   Serial.println("Email: marcelomaurinmartins@gmail.com");
 }

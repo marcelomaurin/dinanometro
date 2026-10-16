@@ -1,44 +1,512 @@
 object frmmain: Tfrmmain
-  Left = 310
-  Height = 374
-  Top = 285
-  Width = 714
-  Caption = 'Dinanometro'
-  ClientHeight = 374
-  ClientWidth = 714
-  Position = poMainFormCenter
-  LCLVersion = '4.4.0.0'
+  Left = 140
+  Height = 620
+  Top = 70
+  Width = 980
+  Caption = 'Maurinsoft Dinamometro Digital - Medicao e Ensino de Forcas'
+  ClientHeight = 620
+  ClientWidth = 980
+  Color = 1183244
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
+  Position = poScreenCenter
+  LCLVersion = '4.4.0.0'
+  object pnHeader: TPanel
+    Left = 0
+    Height = 56
+    Top = 0
+    Width = 980
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 56
+    ClientWidth = 980
+    Color = 2366746
+    ParentColor = False
+    TabOrder = 0
+    object lblAppTitle: TLabel
+      Left = 16
+      Height = 25
+      Top = 6
+      Width = 380
+      Caption = 'MAURINSOFT DINAMOMETRO DIGITAL'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = 65535
+      Font.Height = -20
+      Font.Name = 'Segoe UI'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object lblAppSubtitle: TLabel
+      Left = 16
+      Height = 15
+      Top = 32
+      Width = 440
+      Caption = 'Medicao e Analise de Forcas Newtonianas | Celula de Carga & ESP32 | FATEC RP'
+      Font.Color = 10526880
+      Font.Height = -12
+      Font.Name = 'Segoe UI'
+      ParentColor = False
+      ParentFont = False
+    end
+    object pnlNavButtons: TPanel
+      Left = 475
+      Height = 40
+      Top = 8
+      Width = 490
+      Anchors = [akTop, akRight]
+      BevelOuter = bvNone
+      ClientHeight = 40
+      ClientWidth = 490
+      Color = 2366746
+      ParentColor = False
+      TabOrder = 0
+      object btnNavStep1: TButton
+        Left = 4
+        Height = 32
+        Top = 4
+        Width = 115
+        Caption = '1. Medicao'
+        Font.Style = [fsBold]
+        OnClick = btnNavStepClick
+        ParentFont = False
+        TabOrder = 0
+      end
+      object btnNavStep2: TButton
+        Left = 125
+        Height = 32
+        Top = 4
+        Width = 115
+        Caption = '2. Grafico'
+        Font.Style = [fsBold]
+        OnClick = btnNavStepClick
+        ParentFont = False
+        TabOrder = 1
+      end
+      object btnNavStep3: TButton
+        Left = 246
+        Height = 32
+        Top = 4
+        Width = 115
+        Caption = '3. Calibracao'
+        Font.Style = [fsBold]
+        OnClick = btnNavStepClick
+        ParentFont = False
+        TabOrder = 2
+      end
+      object btnNavStep4: TButton
+        Left = 367
+        Height = 32
+        Top = 4
+        Width = 115
+        Caption = '4. Sobre'
+        Font.Style = [fsBold]
+        OnClick = btnNavStepClick
+        ParentFont = False
+        TabOrder = 3
+      end
+    end
+  end
   object PageControl1: TPageControl
     Left = 0
-    Height = 374
-    Top = 0
-    Width = 714
-    ActivePage = tsSobre
+    Height = 564
+    Top = 56
+    Width = 980
+    ActivePage = TabSheet1
     Align = alClient
     TabIndex = 0
-    TabOrder = 0
-    object tsSobre: TTabSheet
-      Caption = 'Sobre'
-      ClientHeight = 346
-      ClientWidth = 706
-      object Label6: TLabel
-        Left = 275
-        Height = 15
-        Top = 134
-        Width = 186
-        Caption = 'Criado por Marcelo Maurin Martins'
-        ParentColor = False
+    TabOrder = 1
+    object TabSheet1: TTabSheet
+      Caption = '1. Medicao'
+      ClientHeight = 536
+      ClientWidth = 972
+      object indGnouMeter1: TindGnouMeter
+        Left = 24
+        Height = 480
+        Top = 20
+        Width = 110
+        Caption = 'Forca Kgf'
+        SignalUnit = 'Units'
+        ValueMax = 10000
+        Digits = 0
+        Increment = 10
+        MarkerColor = clBlue
       end
-      object Image1: TImage
-        Left = 26
-        Height = 147
-        Top = 45
-        Width = 168
-        Picture.Data = {
+      object A3nalogGauge1: TA3nalogGauge
+        Left = 150
+        Height = 220
+        Top = 20
+        Width = 320
+        Angle = 90
+        Caption = 'Forca  gf'
+        Scale = 1000000
+        ScaleMax = 1000000
+        Style = agsLeftStyle
+      end
+      object Label2: TLabel
+        Left = 155
+        Height = 20
+        Top = 260
+        Width = 150
+        Caption = 'Forca Aplicada (kgf):'
+        Font.Color = clWhite
+        Font.Height = -15
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+      end
+      object LedForca: TLEDNumber
+        Left = 155
+        Height = 42
+        Top = 285
+        Width = 310
+        Caption = '0'
+      end
+      object Label11: TLabel
+        Left = 155
+        Height = 20
+        Top = 345
+        Width = 150
+        Caption = 'Massa Estimada (kg):'
+        Font.Color = clWhite
+        Font.Height = -15
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+      end
+      object ledPeso: TLEDNumber
+        Left = 155
+        Height = 42
+        Top = 370
+        Width = 310
+        Caption = '0'
+      end
+      object pnlControlCard: TPanel
+        Left = 490
+        Height = 480
+        Top = 20
+        Width = 460
+        Anchors = [akTop, akLeft, akRight, akBottom]
+        BevelOuter = bvNone
+        ClientHeight = 480
+        ClientWidth = 460
+        Color = 1775378
+        ParentColor = False
+        TabOrder = 0
+        object lblCtrlTitle: TLabel
+          Left = 24
+          Height = 25
+          Top = 20
+          Width = 260
+          Caption = 'CONTROLE E CONEXAO'
+          Font.Color = 65535
+          Font.Height = -18
+          Font.Style = [fsBold]
+          ParentColor = False
+          ParentFont = False
+        end
+        object Label10: TLabel
+          Left = 24
+          Height = 18
+          Top = 75
+          Width = 190
+          Caption = 'Status da Conexao Serial:'
+          Font.Color = clWhite
+          Font.Height = -14
+          ParentColor = False
+          ParentFont = False
+        end
+        object indLed1: TindLed
+          Left = 230
+          Height = 52
+          Top = 60
+          Width = 57
+          OnClick = indLed1Click
+          LedValue = False
+          Bevels = <          
+            item
+              HighlightColor = clBlack
+              ShadowColor = clBlack
+            end          
+            item
+              Width = 3
+            end          
+            item
+              Style = bcLowered
+            end          
+            item
+              HighlightColor = clBlack
+              ShadowColor = clBlack
+            end>
+          LedColorOn = clLime
+          LedColorOff = clGreen
+          LedColorDisabled = 22963
+          ShapeLedColorOn = clGreen
+          ShapeLedColorOff = 16384
+          ShapeLedColorDisabled = 13416
+        end
+        object btTara: TButton
+          Left = 24
+          Height = 48
+          Top = 150
+          Width = 410
+          Caption = 'Executar Tara (Zerar Balanca)'
+          Font.Height = -14
+          Font.Style = [fsBold]
+          ParentFont = False
+          TabOrder = 0
+          OnClick = btTaraClick
+        end
+        object btCalibra: TButton
+          Left = 24
+          Height = 48
+          Top = 220
+          Width = 410
+          Caption = 'Calibrar Fator com Carga'
+          Font.Height = -14
+          Font.Style = [fsBold]
+          ParentFont = False
+          TabOrder = 1
+          OnClick = btCalibraClick
+        end
+        object lblDicaMed: TLabel
+          Left = 24
+          Height = 80
+          Top = 320
+          Width = 410
+          AutoSize = False
+          Caption = 'Instrucoes de Medicao:' + LineEnding + '1. Conecte ao dispositivo Bluetooth (porta configurada).' + LineEnding + '2. Realize a tara com a celula descarregada.' + LineEnding + '3. Aplique a forca e acompanhe a leitura nos mostradores e grafico.'
+          Font.Color = 10526880
+          Font.Height = -12
+          ParentColor = False
+          ParentFont = False
+          WordWrap = True
+        end
+      end
+    end
+    object TabSheet3: TTabSheet
+      Caption = '2. Grafico'
+      ClientHeight = 536
+      ClientWidth = 972
+      object Chart1: TChart
+        Left = 0
+        Height = 536
+        Top = 0
+        Width = 972
+        AxisList = <        
+          item
+            Marks.LabelBrush.Style = bsClear
+            Minors = <>
+            Title.LabelFont.Orientation = 900
+            Title.LabelBrush.Style = bsClear
+          end        
+          item
+            Alignment = calBottom
+            Marks.LabelBrush.Style = bsClear
+            Minors = <>
+            Title.LabelBrush.Style = bsClear
+          end>
+        Title.Text.Strings = (
+          'Dinamometro - Forca Aplicada em Tempo Real'
+        )
+        Align = alClient
+        PopupMenu = PopupMenu1
+      end
+    end
+    object TabSheet2: TTabSheet
+      Caption = '3. Calibracao'
+      ClientHeight = 536
+      ClientWidth = 972
+      object pnlConfigLeft: TPanel
+        Left = 20
+        Height = 496
+        Top = 20
+        Width = 400
+        BevelOuter = bvNone
+        ClientHeight = 496
+        ClientWidth = 400
+        Color = 1775378
+        ParentColor = False
+        TabOrder = 0
+        object lblParamTitle: TLabel
+          Left = 20
+          Height = 25
+          Top = 16
+          Width = 260
+          Caption = 'PARAMETROS DO DISPOSITIVO'
+          Font.Color = 65535
+          Font.Height = -16
+          Font.Style = [fsBold]
+          ParentColor = False
+          ParentFont = False
+        end
+        object Label1: TLabel
+          Left = 20
+          Height = 15
+          Top = 60
+          Width = 140
+          Caption = 'Porta Serial (Bluetooth):'
+          Font.Color = clWhite
+          ParentColor = False
+          ParentFont = False
+        end
+        object edPorta: TEdit
+          Left = 20
+          Height = 28
+          Top = 80
+          Width = 355
+          TabOrder = 0
+          Text = 'COM5'
+          OnChange = edPortaChange
+        end
+        object Label3: TLabel
+          Left = 20
+          Height = 15
+          Top = 120
+          Width = 120
+          Caption = 'Valor de Tara (Offset):'
+          Font.Color = clWhite
+          ParentColor = False
+          ParentFont = False
+        end
+        object edTara: TEdit
+          Left = 20
+          Height = 28
+          Top = 140
+          Width = 355
+          TabOrder = 1
+          Text = '24594'
+        end
+        object Label4: TLabel
+          Left = 20
+          Height = 15
+          Top = 180
+          Width = 130
+          Caption = 'Fator de Calibracao:'
+          Font.Color = clWhite
+          ParentColor = False
+          ParentFont = False
+        end
+        object edCalibracao: TEdit
+          Left = 20
+          Height = 28
+          Top = 200
+          Width = 355
+          TabOrder = 2
+          Text = '4568'
+          OnChange = edCalibracaoChange
+        end
+        object Label5: TLabel
+          Left = 20
+          Height = 15
+          Top = 240
+          Width = 180
+          Caption = 'Peso de Calibracao Padrao (g):'
+          Font.Color = clWhite
+          ParentColor = False
+          ParentFont = False
+        end
+        object edPesoCal: TEdit
+          Left = 20
+          Height = 28
+          Top = 260
+          Width = 355
+          TabOrder = 3
+          Text = '1000'
+          OnChange = edCalibracaoChange
+        end
+        object btsalvar: TButton
+          Left = 20
+          Height = 42
+          Top = 320
+          Width = 355
+          Caption = 'Salvar Parametros'
+          Font.Height = -14
+          Font.Style = [fsBold]
+          ParentFont = False
+          TabOrder = 4
+          OnClick = btsalvarClick
+        end
+      end
+      object pnlConfigRight: TPanel
+        Left = 440
+        Height = 496
+        Top = 20
+        Width = 510
+        Anchors = [akTop, akLeft, akRight, akBottom]
+        BevelOuter = bvNone
+        ClientHeight = 496
+        ClientWidth = 510
+        Color = 1775378
+        ParentColor = False
+        TabOrder = 1
+        object lblInstTitle: TLabel
+          Left = 20
+          Height = 25
+          Top = 16
+          Width = 280
+          Caption = 'INSTRUCOES DE CALIBRACAO'
+          Font.Color = 65535
+          Font.Height = -16
+          Font.Style = [fsBold]
+          ParentColor = False
+          ParentFont = False
+        end
+        object Memo1: TMemo
+          Left = 20
+          Height = 420
+          Top = 50
+          Width = 470
+          Anchors = [akTop, akLeft, akRight, akBottom]
+          Color = 1183244
+          Font.Color = clWhite
+          Font.Height = -13
+          Font.Name = 'Segoe UI'
+          Lines.Strings = (
+            'O sistema funciona acessando a porta serial criada pelo Bluetooth do ESP32.'
+            ''
+            '1. PORTA: Identifique no Gerenciador de Dispositivos a porta serial Bluetooth pareada (ex: COM5).'
+            ''
+            '2. TARA: Clique em Tara com a celula de carga sem nenhuma forca aplicada.'
+            ''
+            '3. CALIBRACAO: Posicione um peso conhecido (ex: 1000g), digite o valor no campo de peso e clique em Calibrar.'
+            ''
+            '4. GRAVACAO: A tara e calibracao sao armazenadas nas configuracoes locais do software e recarregadas a cada execucao.'
+            ''
+            'Nota: A calibracao e tara operam em software para facilitar o ajuste fino em tempo real sem necessidade de regravar o firmware do ESP32.'
+          )
+          ParentFont = False
+          ReadOnly = True
+          TabOrder = 0
+        end
+      end
+    end
+    object tsSobre: TTabSheet
+      Caption = '4. Sobre'
+      ClientHeight = 536
+      ClientWidth = 972
+      object pnlAboutCard: TPanel
+        Left = 120
+        Height = 470
+        Top = 30
+        Width = 730
+        Anchors = [akTop]
+        BevelOuter = bvNone
+        ClientHeight = 470
+        ClientWidth = 730
+        Color = 1775378
+        ParentColor = False
+        TabOrder = 0
+        object Image1: TImage
+          Left = 36
+          Height = 147
+          Top = 36
+          Width = 168
+          Picture.Data = {
           07544269746D617036C20100424D36C20100000000003600000028000000A000
           0000B4000000010020000000000000C201006400000064000000000000000000
           0000FDFDFDFFFDFDFDFFFDFDFDFFFDFDFDFFFDFDFDFFFDFDFDFFFDFDFDFFFDFD
@@ -3643,289 +4111,99 @@ object frmmain: Tfrmmain
           FDFFFDFDFDFFFDFDFDFFFDFDFDFFFDFDFDFFFDFDFDFFFDFDFDFFFDFDFDFFFDFD
           FDFF
         }
-      end
-      object Label7: TLabel
-        Left = 282
-        Height = 36
-        Top = 58
-        Width = 170
-        Caption = 'Dinamometro'
-        Font.Height = -26
-        Font.Style = [fsBold]
-        ParentColor = False
-        ParentFont = False
-      end
-      object Label8: TLabel
-        Left = 282
-        Height = 15
-        Top = 173
-        Width = 189
-        Caption = 'marcelomaurinmartins@gmail.com'
-        ParentColor = False
-      end
-      object Label9: TLabel
-        Left = 250
-        Height = 15
-        Top = 237
-        Width = 262
-        Caption = 'https://github.com/marcelomaurin/dinanometro'
-        ParentColor = False
-      end
-      object lbversao: TLabel
-        Left = 347
-        Height = 15
-        Top = 300
-        Width = 15
-        Caption = '0.1'
-      end
-      object Label12: TLabel
-        Left = 296
-        Height = 15
-        Top = 300
-        Width = 35
-        Caption = 'Versão'
-      end
-    end
-    object TabSheet2: TTabSheet
-      Caption = 'Configuração'
-      ClientHeight = 346
-      ClientWidth = 706
-      object Label1: TLabel
-        Left = 40
-        Height = 15
-        Top = 50
-        Width = 31
-        Caption = 'Porta:'
-        ParentColor = False
-      end
-      object edPorta: TEdit
-        Left = 40
-        Height = 23
-        Top = 70
-        Width = 189
-        TabOrder = 0
-        Text = 'COM5'
-        OnChange = edPortaChange
-      end
-      object edTara: TEdit
-        Left = 40
-        Height = 23
-        Top = 123
-        Width = 189
-        TabOrder = 1
-        Text = '24594'
-      end
-      object Label3: TLabel
-        Left = 40
-        Height = 15
-        Top = 102
-        Width = 26
-        Caption = 'Tara:'
-        ParentColor = False
-      end
-      object Label4: TLabel
-        Left = 40
-        Height = 15
-        Top = 154
-        Width = 89
-        Caption = 'Valor Calibração:'
-        ParentColor = False
-      end
-      object edCalibracao: TEdit
-        Left = 40
-        Height = 23
-        Top = 173
-        Width = 189
-        TabOrder = 2
-        Text = '4568'
-        OnChange = edCalibracaoChange
-      end
-      object Label5: TLabel
-        Left = 42
-        Height = 15
-        Top = 205
-        Width = 103
-        Caption = 'Peso de Calibração:'
-        ParentColor = False
-      end
-      object edPesoCal: TEdit
-        Left = 40
-        Height = 23
-        Top = 224
-        Width = 189
-        TabOrder = 3
-        Text = '10'
-        OnChange = edCalibracaoChange
-      end
-      object Memo1: TMemo
-        Left = 282
-        Height = 307
-        Top = 19
-        Width = 403
-        Lines.Strings = (
-          'O sistema funciona acessando a porta serial criada pelo bluetooth.'
-          ''
-          'Porta - Porta Serial Criada pelo dispositivo pareado.'
-          'Tara - Valor calculado de Tara '
-          'Valor de Calibração - Valor calculado de Calibração'
-          'Peso de Calibração - Valor do Peso de Referencia para Calibração'
-          ''
-          ''
-          'A tara, e a calibração é feita por software e não por firmware.'
-        )
-        ReadOnly = True
-        TabOrder = 4
-      end
-      object btsalvar: TButton
-        Left = 44
-        Height = 25
-        Top = 275
-        Width = 75
-        Caption = 'Salvar'
-        TabOrder = 5
-        OnClick = btsalvarClick
-      end
-    end
-    object TabSheet1: TTabSheet
-      Caption = 'Informação'
-      ClientHeight = 346
-      ClientWidth = 706
-      object LedForca: TLEDNumber
-        Left = 187
-        Height = 30
-        Top = 51
-        Width = 170
-        Caption = '0'
-      end
-      object indGnouMeter1: TindGnouMeter
-        Left = 13
-        Height = 301
-        Top = 19
-        Width = 100
-        Caption = 'Força Kgf'
-        SignalUnit = 'Units'
-        ValueMax = 10000
-        Digits = 0
-        Increment = 10
-        MarkerColor = clBlue
-      end
-      object A3nalogGauge1: TA3nalogGauge
-        Left = 378
-        Height = 190
-        Top = 26
-        Width = 184
-        Angle = 90
-        Caption = 'Força  gf'
-        Scale = 1000000
-        ScaleMax = 1000000
-        Style = agsLeftStyle
-      end
-      object indLed1: TindLed
-        Left = 582
-        Height = 52
-        Top = 274
-        Width = 57
-        OnClick = indLed1Click
-        LedValue = False
-        Bevels = <        
-          item
-            HighlightColor = clBlack
-            ShadowColor = clBlack
-          end        
-          item
-            Width = 3
-          end        
-          item
-            Style = bcLowered
-          end        
-          item
-            HighlightColor = clBlack
-            ShadowColor = clBlack
-          end>
-        LedColorOn = clLime
-        LedColorOff = clGreen
-        LedColorDisabled = 22963
-        ShapeLedColorOn = clGreen
-        ShapeLedColorOff = 16384
-        ShapeLedColorDisabled = 13416
-      end
-      object Label2: TLabel
-        Left = 186
-        Height = 15
-        Top = 32
-        Width = 60
-        Caption = 'Força (kgf):'
-        ParentColor = False
-      end
-      object btTara: TButton
-        Left = 211
-        Height = 25
-        Top = 282
-        Width = 75
-        Caption = 'Tara'
-        TabOrder = 1
-        OnClick = btTaraClick
-      end
-      object btCalibra: TButton
-        Left = 314
-        Height = 25
-        Top = 282
-        Width = 75
-        Caption = 'Calibra'
-        TabOrder = 2
-        OnClick = btCalibraClick
-      end
-      object Label10: TLabel
-        Left = 576
-        Height = 15
-        Top = 326
-        Width = 72
-        Caption = 'Acionamento'
-        ParentColor = False
-      end
-      object Label11: TLabel
-        Left = 186
-        Height = 15
-        Top = 90
-        Width = 52
-        Caption = 'Peso (kg):'
-        ParentColor = False
-      end
-      object ledPeso: TLEDNumber
-        Left = 187
-        Height = 30
-        Top = 109
-        Width = 170
-        Caption = '0'
-      end
-    end
-    object TabSheet3: TTabSheet
-      Caption = 'Grafico'
-      ClientHeight = 346
-      ClientWidth = 706
-      object Chart1: TChart
-        Left = 0
-        Height = 346
-        Top = 0
-        Width = 706
-        AxisList = <        
-          item
-            Marks.LabelBrush.Style = bsClear
-            Minors = <>
-            Title.LabelFont.Orientation = 900
-            Title.LabelBrush.Style = bsClear
-          end        
-          item
-            Alignment = calBottom
-            Marks.LabelBrush.Style = bsClear
-            Minors = <>
-            Title.LabelBrush.Style = bsClear
-          end>
-        Title.Text.Strings = (
-          'Dinamômetro'
-        )
-        Align = alClient
-        PopupMenu = PopupMenu1
+        end
+        object Label7: TLabel
+          Left = 230
+          Height = 36
+          Top = 40
+          Width = 420
+          Caption = 'MAURINSOFT DINAMOMETRO'
+          Font.Color = 65535
+          Font.Height = -24
+          Font.Style = [fsBold]
+          ParentColor = False
+          ParentFont = False
+        end
+        object Label6: TLabel
+          Left = 230
+          Height = 20
+          Top = 90
+          Width = 350
+          Caption = 'Criado por Marcelo Maurin Martins'
+          Font.Color = clWhite
+          Font.Height = -15
+          ParentColor = False
+          ParentFont = False
+        end
+        object lblFatInst: TLabel
+          Left = 230
+          Height = 18
+          Top = 120
+          Width = 350
+          Caption = 'FATEC Ribeirao Preto - Sistemas Biomedicos'
+          Font.Color = 10526880
+          Font.Height = -13
+          ParentColor = False
+          ParentFont = False
+        end
+        object Label8: TLabel
+          Left = 230
+          Height = 18
+          Top = 155
+          Width = 260
+          Caption = 'marcelomaurinmartins@gmail.com'
+          Font.Color = 10526880
+          Font.Height = -13
+          ParentColor = False
+          ParentFont = False
+        end
+        object Label9: TLabel
+          Left = 230
+          Height = 18
+          Top = 185
+          Width = 340
+          Caption = 'https://github.com/marcelomaurin/dinanometro'
+          Font.Color = 16753920
+          Font.Height = -13
+          ParentColor = False
+          ParentFont = False
+        end
+        object pnlVersaoBox: TPanel
+          Left = 230
+          Height = 45
+          Top = 240
+          Width = 220
+          BevelOuter = bvNone
+          ClientHeight = 45
+          ClientWidth = 220
+          Color = 2366746
+          ParentColor = False
+          TabOrder = 0
+          object Label12: TLabel
+            Left = 16
+            Height = 20
+            Top = 12
+            Width = 55
+            Caption = 'Versao:'
+            Font.Color = clWhite
+            Font.Height = -15
+            Font.Style = [fsBold]
+            ParentColor = False
+            ParentFont = False
+          end
+          object lbversao: TLabel
+            Left = 85
+            Height = 20
+            Top = 12
+            Width = 30
+            Caption = '2.0'
+            Font.Color = 65535
+            Font.Height = -15
+            Font.Style = [fsBold]
+            ParentColor = False
+            ParentFont = False
+          end
+        end
       end
     end
   end
@@ -3958,7 +4236,7 @@ object frmmain: Tfrmmain
     Left = 64
     Top = 320
     object milimpar: TMenuItem
-      Caption = 'Limpar'
+      Caption = 'Limpar Grafico'
       OnClick = milimparClick
     end
   end
